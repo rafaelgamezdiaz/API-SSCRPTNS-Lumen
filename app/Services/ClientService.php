@@ -32,22 +32,11 @@ class ClientService
         return $this->successResponse('List of clients',$clients);
     }
 
-    public function store($id)
-    {
-        $client = Client::create([
-            'client_id' => $id
-        ]);
-        return $this->successResponse('Client was saved', $client);
-    }
-
     public function getClient($id)
     {
         $endpoint = '/clients/'.$id;
         $url = $this->getURL().$endpoint;
         $client = $this->performRequest('GET',$url,null,[]);
         return collect($client)->first();
-       // return $this->successResponse('Client',$client);
-        //$clients = collect($clients)->first();
-        //return $this->successResponse('List of clients',$clients);
     }
 }

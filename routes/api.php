@@ -24,9 +24,9 @@ $router->group(['prefix' => 'ct'], function () use ($router) {
     $router->get('products/', 'Product\ProductController@index');
 
     // CONTRACT ROUTES
-    $router->get('contracts/', 'Contract\ContractController@index');
-    $router->post('contracts/', 'Contract\ContractController@store');
-    $router->put('contracts/{id}', 'Contract\ContractController@update');
-    $router->patch('contracts/{id}', 'Contract\ContractController@update');
-    $router->delete('contracts/{id}', 'Contract\ContractController@destroy');
+    $router->get('subscriptions/', 'Subscription\SubscriptionController@index');
+    $router->post('subscriptions/', 'Subscription\SubscriptionController@store');
+    $router->put('subscriptions/{id}', 'Subscription\SubscriptionController@update');
+    $router->patch('subscriptions/{id}', 'Subscription\SubscriptionController@update');
+    $router->delete('subscriptions/{id}', 'Subscription\SubscriptionController@destroy');
 } );

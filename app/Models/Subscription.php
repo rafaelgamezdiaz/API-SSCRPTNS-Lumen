@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Subscription extends Model
 {
     protected $fillable = [
+            'code',
             'client_id',
-            'product_id',
             'date_start',
             'date_end',
             'payment_periodicity'
@@ -20,7 +20,6 @@ class Subscription extends Model
     {
         return [
             'client_id'             => 'required|numeric',
-            'product_id'            => 'required|numeric',
             'date_start'            => 'required',
             'date_end'              => 'required',
             'payment_periodicity'   => 'required'
@@ -32,9 +31,14 @@ class Subscription extends Model
         return $this->client_name = $clientService->getClient($id);
     }
 
-    public function subscriptions()
+    public function subscriptionDetails()
     {
         return $this->hasMany(SubscriptionDetail::class);
+    }
+
+    public function checkCode($code)
+    {
+        return count(Subscription::where('code', $code)->get()) == 0;
     }
 
 }

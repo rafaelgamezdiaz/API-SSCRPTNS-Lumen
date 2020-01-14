@@ -5,6 +5,8 @@ namespace App\Services;
 
 
 use App\Models\Product;
+use App\Models\Subscription;
+use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
 
@@ -33,12 +35,25 @@ class ProductService
         return $this->successResponse('List of products',$products);
     }
 
-    public function store($id)
+    public function store($subscription_id, $product_id)
     {
-        $product = Product::create([
-            'product_id' => $id
+        if (is_array($product_id)) {
+            foreach ($product_id as $product)
+            {
+                $this->saveProduct($subscription_id, $product);
+            }
+            return $this->successResponse('Subscriptions were saved');
+        }
+        $this->saveProduct($subscription_id, $product_id);
+        return $this->successResponse('Product was saved', $subscription);
+    }
+
+    public function saveProduct($subscription_id, $product_id)
+    {
+        return SubscriptionDetail::create([
+            'subscription_id' => $subscription_id,
+            'product_id' => $product_id
         ]);
-        return $this->successResponse('Product was saved', $product);
     }
 
     public function getProduct($id)
