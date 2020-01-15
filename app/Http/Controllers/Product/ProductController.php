@@ -25,4 +25,10 @@ class ProductController extends Controller
     {
         return $this->productService->index();
     }
+
+    public function show($id)
+    {
+        $product =  $this->productService->getProduct($id);
+        return $this->successResponse('Produc or Service',$product);
+    }
 }

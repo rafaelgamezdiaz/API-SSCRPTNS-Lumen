@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Services\ClientService;
+use App\Traits\ConsumesExternalService;
 use Illuminate\Database\Eloquent\Model;
 
 class Subscription extends Model
 {
+    use ConsumesExternalService;
+
     protected $fillable = [
             'code',
             'client_id',
@@ -34,6 +37,14 @@ class Subscription extends Model
     public function subscriptionDetails()
     {
         return $this->hasMany(SubscriptionDetail::class);
+    }
+
+    public function getProduct($id)
+    {
+        $endpoint = '/products/'.$id;
+        $url = $this->getURL().$endpoint;
+        $product = $this->performRequest('GET',$url,null,[]);
+        return collect($product)->first();
     }
 
     public function checkCode($code)

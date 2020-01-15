@@ -6,24 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Subscription;
 use App\Services\ClientService;
 use App\Services\ProductService;
+use App\Services\SubscriptionService;
 use App\Traits\ApiResponser;
+use App\Traits\ConsumesExternalService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
 {
-    use ApiResponser;
+    use ApiResponser, ConsumesExternalService;
 
-    public function index(ClientService $clientService, ProductService $productService)
+    public function index(ClientService $clientService, ProductService $productService, SubscriptionService $subscriptionService)
     {
-        $subscriptions = Subscription::all()->sortBy('id')->flatten();
-
-        $subscriptions->each(function($subscriptions) use($clientService, $productService){
-            $subscriptions->client = $clientService->getClient($subscriptions->client_id);
-            $subscriptions->subscriptionDetails;
-            //$subscriptions->subscriptionDetails->getProduct($subscriptions->product_id);
-            //$subscriptions->product = $productService->getProduct($subscriptions->product_id);
-        });
+        $subscriptions = $subscriptionService->index($clientService, $productService);
         return $this->successResponse('List of subscriptions', $subscriptions);
     }
 

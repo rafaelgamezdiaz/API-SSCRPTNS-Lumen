@@ -22,6 +22,7 @@ $router->group(['prefix' => 'ct'], function () use ($router) {
 
     // PRODUCTS ROUTES
     $router->get('products/', 'Product\ProductController@index');
+    $router->get('products/{id}', 'Product\ProductController@show');
 
     // CONTRACT ROUTES
     $router->get('subscriptions/', 'Subscription\SubscriptionController@index');
