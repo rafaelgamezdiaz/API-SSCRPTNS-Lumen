@@ -28,8 +28,4 @@ class ClientController extends Controller
         return $this->clientService->index();
     }
 
-    /*public function store($id)
-    {
-
-    }*/
 }

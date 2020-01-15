@@ -13,12 +13,4 @@ class SubscriptionDetail extends Model
         return $this->belongsTo(Subscription::class);
     }
 
-    public function getProduct($id)
-    {
-        $endpoint = '/products/'.$id;
-        $url = $this->getURL().$endpoint;
-        $product = $this->performRequest('GET',$url,null,[]);
-        return collect($product)->first();
-    }
-
 }

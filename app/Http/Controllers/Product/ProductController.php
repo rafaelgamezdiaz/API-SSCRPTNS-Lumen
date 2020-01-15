@@ -21,11 +21,20 @@ class ProductController extends Controller
         $this->productService = $productService;
     }
 
+    /**
+     * Returns the product List from API-Ventas
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         return $this->productService->index();
     }
 
+    /**
+     * Returns a Product or Service from API-Ventas
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show($id)
     {
         $product =  $this->productService->getProduct($id);

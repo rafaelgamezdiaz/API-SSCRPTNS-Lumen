@@ -16,49 +16,58 @@ class SubscriptionController extends Controller
 {
     use ApiResponser, ConsumesExternalService;
 
+    /**
+     * Returns all Subscriptions including Client info and Products or Services Info
+     * @param ClientService $clientService
+     * @param ProductService $productService
+     * @param SubscriptionService $subscriptionService
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(ClientService $clientService, ProductService $productService, SubscriptionService $subscriptionService)
     {
         $subscriptions = $subscriptionService->index($clientService, $productService);
         return $this->successResponse('List of subscriptions', $subscriptions);
     }
 
-    public function store(Request $request, Subscription $subscription, ProductService $product)
+    /**
+     * Store a Subscription
+     * @param Request $request
+     * @param Subscription $subscription
+     * @param ProductService $productService
+     * @param SubscriptionService $subscriptionService
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function store(Request $request, Subscription $subscription, ProductService $productService, SubscriptionService $subscriptionService)
     {
-        $this->validate($request, $subscription->rules());
-        $subscription->fill($request->all());
-        $subscription->last_billing = Carbon::now();
-
-        if ($subscription->checkCode($request->code)) {
-            if ($subscription->save()) {
-                $product->store($subscription->id, $request->product_id);
-
-                return $this->successResponse('Subscription saved!', $subscription->id);
-            }
-            return $this->errorMessage('Sorry. Something happends when trying to save the subscription!', 409);
-        }
-        return $this->errorMessage('This code is not available!', 409);
+        return $subscriptionService->store($request, $subscription, $productService);
     }
 
-    public function update(Request $request, $id, Subscription $subscription)
+    /**
+     * Update a Subscription
+     * @param Request $request
+     * @param $id
+     * @param ProductService $productService
+     * @param SubscriptionService $subscriptionService
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, $id, ProductService $productService, SubscriptionService $subscriptionService)
     {
-        $subscription = Subscription::findOrFail($id);
-        $subscription->fill($request->all());
-        if ($subscription->isClean()) {
-            return $this->errorMessage('Sorry, At least one field must be different!', 409);
-        }
-        if ($subscription->save()) {
-            return $this->successResponse($subscription);
-        }
-        return $this->errorMessage('Sorry. Something happends when trying to update the subscription!', 409);
+        return $subscriptionService->update($request, $id, $productService);
     }
 
-    public function destroy($id)
+    /**
+     * Remove a Subscription
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id, SubscriptionService $subscriptionService)
     {
-        $subscription = Subscription::findOrFail($id);
-        if ($subscription->delete())
-        {
-            return $this->successResponse('The contract was deleted');
-        }
-        return $this->errorMessage('Sorry! Something happends when trying to delete the subscription.');
+        return $subscriptionService->destroy($id);
+    }
+
+
+    public function status(Request $request, $id, Subscription $subscription, SubscriptionService $subscriptionService){
+        return $subscriptionService->status($request, $id, $subscription);
     }
 }

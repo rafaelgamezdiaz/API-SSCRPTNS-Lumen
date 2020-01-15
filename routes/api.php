@@ -24,10 +24,12 @@ $router->group(['prefix' => 'ct'], function () use ($router) {
     $router->get('products/', 'Product\ProductController@index');
     $router->get('products/{id}', 'Product\ProductController@show');
 
-    // CONTRACT ROUTES
+    // SUBSCRIPTIONS ROUTES
     $router->get('subscriptions/', 'Subscription\SubscriptionController@index');
     $router->post('subscriptions/', 'Subscription\SubscriptionController@store');
     $router->put('subscriptions/{id}', 'Subscription\SubscriptionController@update');
     $router->patch('subscriptions/{id}', 'Subscription\SubscriptionController@update');
     $router->delete('subscriptions/{id}', 'Subscription\SubscriptionController@destroy');
+    $router->put('subscriptions/{id}/status', 'Subscription\SubscriptionController@status');
+
 } );

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Subscription;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,10 +20,9 @@ class CreateSubscriptionsTable extends Migration
             $table->unsignedBigInteger('client_id');
             $table->date('date_start');
             $table->date('date_end')->nullable();
-            $table->enum('payment_periodicity', ['semanal','mensual','quincenal','anual'])
+            $table->enum('billing_cycle', ['semanal','mensual','quincenal','anual'])
                   ->default('mensual');
-            $table->date('last_billing')->nullable();
-            $table->boolean('active')->default(true);
+            $table->string('status')->default(Subscription::SUBSCRIPTION_ACTIVE);
 
             $table->softDeletes();
             $table->timestamps();

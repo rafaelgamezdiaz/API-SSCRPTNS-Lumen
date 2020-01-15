@@ -4,7 +4,6 @@
 namespace App\Services;
 
 
-use App\Models\Client;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
 
@@ -20,6 +19,10 @@ class ClientService
         $this->prefix   = config('services.clients.prefix');
     }
 
+    /**
+     * Returns the List of Clients from API-Clients, corresponding to the actual account
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         $endpoint = '/clients';
@@ -32,6 +35,11 @@ class ClientService
         return $this->successResponse('List of clients',$clients);
     }
 
+    /**
+     * Returns a Client from API-Clients, by id
+     * @param $id
+     * @return mixed
+     */
     public function getClient($id)
     {
         $endpoint = '/clients/'.$id;
