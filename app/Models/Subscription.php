@@ -4,11 +4,10 @@ namespace App\Models;
 
 use App\Services\ClientService;
 use App\Traits\ConsumesExternalService;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;
 
-class Subscription extends Model
+class Subscription extends BaseModel
 {
     use ConsumesExternalService;
     use SoftDeletes;

@@ -23,9 +23,9 @@ class SubscriptionController extends Controller
      * @param SubscriptionService $subscriptionService
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(ClientService $clientService, ProductService $productService, SubscriptionService $subscriptionService)
+    public function index(Request $request, ClientService $clientService, ProductService $productService, SubscriptionService $subscriptionService)
     {
-        $subscriptions = $subscriptionService->index($clientService, $productService);
+        $subscriptions = $subscriptionService->index($request, $clientService, $productService);
         return $this->successResponse('List of subscriptions', $subscriptions);
     }
 

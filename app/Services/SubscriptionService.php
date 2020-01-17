@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Subscription;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
+use http\Env\Request;
 use Laravel\Lumen\Routing\ProvidesConvenienceMethods;
 
 class SubscriptionService
@@ -19,9 +20,15 @@ class SubscriptionService
      * @param $productService
      * @return \Illuminate\Support\Collection
      */
-    public function index($clientService, $productService)
+    public function index($request, $clientService, $productService)
     {
-        $subscriptions = Subscription::all()->sortBy('id')->flatten();
+        if (isset($_GET['where'])) {
+            $subscriptions = Subscription::doWhere($request)->orderBy('created_at', 'desc')->get();
+        }
+        else{
+            $subscriptions = Subscription::all()->sortByDesc('created_at');
+        }
+       // $subscriptions = Subscription::all()->sortBy('id')->flatten();
 
         // Get Clients and Products (or Services) for the Subscription
         $subscriptions->each(function($subscriptions) use($clientService, $productService){
