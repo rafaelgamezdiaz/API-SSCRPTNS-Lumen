@@ -16,6 +16,7 @@ class Subscription extends BaseModel
     const SUBSCRIPTION_INACTIVE = 'inactive';
 
     protected $fillable = [
+            'account',
             'code',
             'client_id',
             'date_start',
@@ -28,9 +29,10 @@ class Subscription extends BaseModel
     public function rules()
     {
         return [
-            'client_id'             => 'required|numeric',
-            'date_start'            => 'required',
-            'date_end'              => 'required',
+            'code'            => 'required',
+            'client_id'       => 'required|numeric',
+            'date_start'      => 'required',
+            'date_end'        => 'required',
             'billing_cycle'   => 'required'
         ];
     }

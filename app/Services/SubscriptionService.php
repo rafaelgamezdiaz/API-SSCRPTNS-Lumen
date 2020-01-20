@@ -23,13 +23,16 @@ class SubscriptionService
     public function index($request, $clientService, $productService)
     {
         if (isset($_GET['where'])) {
-            $subscriptions = Subscription::doWhere($request)->orderBy('created_at', 'desc')->get();
+            $subscriptions = Subscription::doWhere($request)
+                                         ->where('account', $this->getAccount($request))
+                                         ->orderBy('created_at', 'desc')
+                                         ->get();
         }
         else{
-            $subscriptions = Subscription::all()->sortByDesc('created_at');
+            $subscriptions = Subscription::where('account', $this->getAccount($request))
+                                         ->orderBy('created_at', 'desc')
+                                         ->get();
         }
-       // $subscriptions = Subscription::all()->sortBy('id')->flatten();
-
         // Get Clients and Products (or Services) for the Subscription
         $subscriptions->each(function($subscriptions) use($clientService, $productService){
             $subscriptions->client = $clientService->getClient($subscriptions->client_id);
@@ -54,6 +57,7 @@ class SubscriptionService
         // Validations
         $this->validate($request, $subscription->rules());
         $subscription->fill($request->all());
+        $subscription->account = $this->getAccount($request);
 
         if ($subscription->checkCode($request->code)) {
             if ($subscription->save()) {

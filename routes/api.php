@@ -15,7 +15,7 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->group(['prefix' => 'ct'], function () use ($router) {
+$router->group(['prefix' => 'ct', 'middleware' => 'auth'], function () use ($router) {
 
     // CLIENTS ROUTES
     $router->get('clients/', 'Client\ClientController@index');
@@ -24,6 +24,7 @@ $router->group(['prefix' => 'ct'], function () use ($router) {
     $router->get('products/', 'Product\ProductController@index');
     $router->get('products/{id}', 'Product\ProductController@show');
 
+
     // SUBSCRIPTIONS ROUTES
     $router->get('subscriptions/', 'Subscription\SubscriptionController@index');
     $router->post('subscriptions/', 'Subscription\SubscriptionController@store');
@@ -31,5 +32,10 @@ $router->group(['prefix' => 'ct'], function () use ($router) {
     $router->patch('subscriptions/{id}', 'Subscription\SubscriptionController@update');
     $router->delete('subscriptions/{id}', 'Subscription\SubscriptionController@destroy');
     $router->put('subscriptions/{id}/status', 'Subscription\SubscriptionController@status');
+
+    // REPORT XLS
+    $router->group(['prefix' => 'report'], function () use ($router) {
+        $router->post('/automatic', 'Report\ReportController@automatic');
+    });
 
 } );

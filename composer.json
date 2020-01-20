@@ -6,11 +6,13 @@
     "type": "project",
     "require": {
         "php": "^7.2",
+        "ext-json": "*",
+        "dompdf/dompdf": "^0.8.3",
         "flipbox/lumen-generator": "^6.0",
         "guzzlehttp/guzzle": "^6.5",
         "laravel/lumen-framework": "^6.0",
         "nesbot/carbon": "^2.28",
-        "ext-json": "*"
+        "phpoffice/phpspreadsheet": "^1.10"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
