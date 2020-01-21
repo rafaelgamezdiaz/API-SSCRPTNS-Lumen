@@ -1,0 +1,177 @@
+##
+# Ansible managed
+#
+
+stages:
+  - backup
+  - build
+  - deploy
+  - rollback
+
+
+dev_backup_job:
+  stage: backup
+  script:
+    - docker image tag devsub-api:latest devsub-api:prev || true
+  tags:
+    - devapp
+  only :
+    - develop
+
+dev_build_job:
+  stage: build
+  script:
+    - sed -i -e "s;^\s*APP_DEBUG=.*;APP_DEBUG=True;g" .env
+    - sed -i -e "s;^\s*DB_CONNECTION=.*;DB_CONNECTION=pgsql;g" .env
+    - sed -i -e "s;^\s*DB_HOST=.*;DB_HOST=192.168.0.10;g" .env
+    - sed -i -e "s;^\s*DB_PORT=.*;DB_PORT=5433;g" .env
+    - sed -i -e "s;^\s*DB_DATABASE=.*;DB_DATABASE=devsub;g" .env
+    - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=devsub;g" .env
+    - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$DEV_DB_PASS;g" .env
+    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://devsub.zippyttech.com/sub;g" .env
+    - docker build -t devsub-api .
+  when: on_success
+  tags:
+    - devapp
+  only :
+    - develop
+
+dev_deploy_job:
+  stage: deploy
+  script:
+    - docker stop devsub-api || true
+    - docker rm devsub-api || true
+    - docker run -d --restart always --name devsub-api -p 3010:80 devsub-api
+    - docker exec devsub-api php artisan migrate
+  when: on_success
+  tags:
+    - devapp
+  only:
+    - develop
+
+dev_rollback_job:
+  stage: rollback
+  script:
+    - docker image tag devsub-api:prev devsub-api:latest
+    - docker stop devsub-api || true
+    - docker rm devsub-api || true
+    - docker run -d --restart always --name devsub-api -p 3010:80 devsub-api
+  when: manual
+  tags:
+    - devapp
+  only:
+    - develop
+
+
+
+
+qa_backup_job:
+  stage: backup
+  script:
+    - docker image tag qasub-api:latest qasub-api:prev || true
+  tags:
+    - qaapp
+  only :
+    - QA
+
+qa_build_job:
+  stage: build
+  script:
+    - sed -i -e "s;^\s*APP_DEBUG=.*;APP_DEBUG=False;g" .env
+    - sed -i -e "s;^\s*DB_CONNECTION=.*;DB_CONNECTION=pgsql;g" .env
+    - sed -i -e "s;^\s*DB_HOST=.*;DB_HOST=10.0.0.25;g" .env
+    - sed -i -e "s;^\s*DB_PORT=.*;DB_PORT=5432;g" .env
+    - sed -i -e "s;^\s*DB_DATABASE=.*;DB_DATABASE=qasub;g" .env
+    - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=qasub;g" .env
+    - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$QA_DB_PASS;g" .env
+    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://qasub.zippyttech.com/sub;g" .env
+    - docker build -t qasub-api .
+  when: on_success
+  tags:
+    - qaapp
+  only :
+    - QA
+
+qa_deploy_job:
+  stage: deploy
+  script:
+    - docker stop qasub-api || true
+    - docker rm qasub-api || true
+    - docker run -d --restart always --name qasub-api -p 3009:80 qasub-api
+    - docker exec qasub-api php artisan migrate
+  when: on_success
+  tags:
+    - qaapp
+  only:
+    - QA
+
+qa_rollback_job:
+  stage: rollback
+  script:
+    - docker image tag qasub-api:prev qasub-api:latest
+    - docker stop qasub-api || true
+    - docker rm qasub-api || true
+    - docker run -d --restart always --name qasub-api -p 3009:80 qasub-api
+  when: manual
+  tags:
+    - qaapp
+  only:
+    - QA
+
+
+
+
+prod_backup_job:
+  stage: backup
+  script:
+    - docker image tag prodsub-api:latest prodsub-api:prev || true
+  tags:
+    - prodapp
+  only :
+    - tags
+
+prod_build_job:
+  stage: build
+  script:
+    - sed -i -e "s;^\s*APP_DEBUG=.*;APP_DEBUG=False;g" .env
+    - sed -i -e "s;^\s*DB_CONNECTION=.*;DB_CONNECTION=pgsql;g" .env
+    - sed -i -e "s;^\s*DB_HOST=.*;DB_HOST=10.0.0.31;g" .env
+    - sed -i -e "s;^\s*DB_PORT=.*;DB_PORT=5432;g" .env
+    - sed -i -e "s;^\s*DB_DATABASE=.*;DB_DATABASE=sub;g" .env
+    - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=sub;g" .env
+    - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$PROD_DB_PASS;g" .env
+    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://sub.zippyttech.com/sub;g" .env
+    - docker build -t prodsub-api .
+  when: on_success
+  tags:
+    - prodapp
+  only :
+    - tags
+
+prod_deploy_job:
+  stage: deploy
+  script:
+    - docker stop prodsub-api || true
+    - docker rm prodsub-api || true
+    - docker run -d --restart always --name prodsub-api -p 3005:80 prodsub-api
+    - docker exec prodsub-api php artisan migrate
+  when: on_success
+  tags:
+    - prodapp
+  only:
+    - tags
+
+prod_rollback_job:
+  stage: rollback
+  script:
+    - docker image tag prodsub-api:prev prodsub-api:latest
+    - docker stop prodsub-api || true
+    - docker rm prodsub-api || true
+    - docker run -d --restart always --name prodsub-api -p 3005:80 prodsub-api
+  when: manual
+  tags:
+    - prodapp
+  only:
+    - tags
+
+
