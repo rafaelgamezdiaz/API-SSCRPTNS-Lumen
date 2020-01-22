@@ -31,8 +31,8 @@ class SubscriptionService
         }
         else{
             $subscriptions = Subscription::where('account', $this->account())
-                                         ->orderBy('created_at', 'desc')
-                                         ->get();
+                                         ->orderBy('created_at', 'desc');
+                                       //  ->get();
         }
         // Get Clients and Products (or Services) for the Subscription
         $subscriptions->each(function($subscriptions) use($clientService, $productService){

@@ -26,7 +26,8 @@ class SubscriptionController extends Controller
     public function index(Request $request, ClientService $clientService, ProductService $productService, SubscriptionService $subscriptionService)
     {
         $subscriptions = $subscriptionService->index($request, $clientService, $productService);
-        return $this->successResponse('List of subscriptions', $subscriptions);
+        //return response()->json($subscriptions);
+        return $this->dataResponse($subscriptions);
     }
 
     /**
