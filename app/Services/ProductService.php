@@ -33,7 +33,6 @@ class ProductService
         $url = $this->getURL().$endpoint;
         $products = $this->performRequest('GET',$url,null,[]);
         $products = collect($products)->first();
-
         return $this->successResponse('List of products',$products);
     }
 
@@ -126,8 +125,14 @@ class ProductService
         $endpoint = '/products/'.$id;
         $url = $this->getURL().$endpoint;
         $product = $this->performRequest('GET',$url,null,[]);
-        return collect($product)->first();
+        $product = collect($product)->recursive();
+
+        // Returns Some Products (or Services) Info
+        $product = $product->first()->first()->only(['name']);
+
+        // Returns Full Products (or Services) Info
+        //$product = collect($product)->first();
+
+        return $product;
     }
-
-
 }

@@ -45,6 +45,16 @@ class ClientService
         $endpoint = '/clients/'.$id;
         $url = $this->getURL().$endpoint;
         $client = $this->performRequest('GET',$url,null,[]);
-        return collect($client)->first();
+        $client = collect($client)->recursive(); //only(['name']);//->only(['name','last_name']);//->only(['name', 'last_name']);
+
+        // Returns Some Clients Info
+        $client = $client->first()->only(['name','last_name']);//->only(['name','last_name']);//->only(['name', 'last_name']);
+
+        // Return Full Client Info uncomment the next line
+        //$client = $client->first();
+
+        return $client;
     }
+
+
 }
