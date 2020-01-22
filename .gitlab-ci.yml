@@ -1,4 +1,4 @@
-#
+##
 # Ansible managed
 #
 
@@ -29,6 +29,19 @@ dev_build_job:
     - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=devsub;g" .env
     - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$DEV_DB_PASS;g" .env
     - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://devsub.zippyttech.com/sub;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_BASE_URL=.*;USERS_SERVICE_BASE_URL=https://devus.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_PORT=.*;USERS_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_SECRET=.*;USERS_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*USERS_PREFIX=.*;USERS_PREFIX=/us;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_BASE_URL=.*;CUSTOMER_SERVICE_BASE_URL=https://devcs.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_PORT=.*;CUSTOMER_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_SECRET=.*;CUSTOMER_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_PREFIX=.*;CUSTOMER_PREFIX=/cs;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_BASE_URL=.*;INVENTORY_SERVICE_BASE_URL=https://devin.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_PORT=.*;INVENTORY_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_SECRET=.*;INVENTORY_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*INVENTORY_PREFIX=.*;INVENTORY_PREFIX=/in;g" .env
+    - sed -i -e "s;^\s*NOTIFICATIONS_URL=.*;NOTIFICATIONS_URL=https://ydoq78e5zl.execute-api.us-east-1.amazonaws.com/production/api/;g" .env
     - docker build -t devsub-api .
   when: on_success
   tags:
@@ -85,6 +98,19 @@ qa_build_job:
     - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=qasub;g" .env
     - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$QA_DB_PASS;g" .env
     - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://qasub.zippyttech.com/sub;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_BASE_URL=.*;USERS_SERVICE_BASE_URL=https://qaus.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_PORT=.*;USERS_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_SECRET=.*;USERS_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*USERS_PREFIX=.*;USERS_PREFIX=/us;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_BASE_URL=.*;CUSTOMER_SERVICE_BASE_URL=https://qacs.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_PORT=.*;CUSTOMER_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_SECRET=.*;CUSTOMER_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_PREFIX=.*;CUSTOMER_PREFIX=/cs;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_BASE_URL=.*;INVENTORY_SERVICE_BASE_URL=https://qain.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_PORT=.*;INVENTORY_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_SECRET=.*;INVENTORY_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*INVENTORY_PREFIX=.*;INVENTORY_PREFIX=/in;g" .env
+    - sed -i -e "s;^\s*NOTIFICATIONS_URL=.*;NOTIFICATIONS_URL=https://ydoq78e5zl.execute-api.us-east-1.amazonaws.com/production/api/;g" .env
     - docker build -t qasub-api .
   when: on_success
   tags:
@@ -141,6 +167,19 @@ prod_build_job:
     - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=sub;g" .env
     - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$PROD_DB_PASS;g" .env
     - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://sub.zippyttech.com/sub;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_BASE_URL=.*;USERS_SERVICE_BASE_URL=https://us.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_PORT=.*;USERS_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*USERS_SERVICE_SECRET=.*;USERS_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*USERS_PREFIX=.*;USERS_PREFIX=/us;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_BASE_URL=.*;CUSTOMER_SERVICE_BASE_URL=https://cs.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_PORT=.*;CUSTOMER_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_SERVICE_SECRET=.*;CUSTOMER_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*CUSTOMER_PREFIX=.*;CUSTOMER_PREFIX=/cs;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_BASE_URL=.*;INVENTORY_SERVICE_BASE_URL=https://in.zippyttech.com;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_PORT=.*;INVENTORY_SERVICE_PORT=;g" .env
+    - sed -i -e "s;^\s*INVENTORY_SERVICE_SECRET=.*;INVENTORY_SERVICE_SECRET=;g" .env
+    - sed -i -e "s;^\s*INVENTORY_PREFIX=.*;INVENTORY_PREFIX=/in;g" .env
+    - sed -i -e "s;^\s*NOTIFICATIONS_URL=.*;NOTIFICATIONS_URL=https://ydoq78e5zl.execute-api.us-east-1.amazonaws.com/production/api/;g" .env
     - docker build -t prodsub-api .
   when: on_success
   tags:
