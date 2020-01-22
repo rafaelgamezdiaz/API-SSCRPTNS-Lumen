@@ -128,7 +128,8 @@ class ProductService
         $product = collect($product)->recursive();
 
         // Returns Some Products (or Services) Info
-        $product = $product->first()->first()->only(['name']);
+        $product = $product->first()->pluck('name');
+        //$product = $product->first()->first()->only(['name']);
 
         // Returns Full Products (or Services) Info
         //$product = collect($product)->first();

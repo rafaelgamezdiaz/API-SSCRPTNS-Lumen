@@ -2,15 +2,15 @@
 
 return [
     'clients' => [
-        'base_url'  => env('CLIENTS_SERVICE_BASE_URL'),
-        'port'      => env('CLIENTS_SERVICE_PORT'),
-        'secret'    => env('CLIENTS_SERVICE_SECRET'),
-        'prefix'    => env('CLIENTS_SERVICE_PREFIX')
+        'base_url'  => env('CUSTOMER_SERVICE_BASE_URL'),
+        'port'      => env('CUSTOMER_SERVICE_PORT'),
+        'secret'    => env('CUSTOMER_SERVICE_SECRET'),
+        'prefix'    => env('CUSTOMER_SERVICE_PREFIX')
     ],
     'sales' => [
-        'base_url'   => env("SALES_SERVICE_BASE_URL"),
-        'port'      => env('SALES_SERVICE_PORT'),
-        'secret'    => env('SALES_SERVICE_SECRET'),
-        'prefix'    => env('SALES_PREFIX')
+        'base_url'  => env('INVENTORY_SERVICE_BASE_URL'),
+        'port'      => env('INVENTORY_SERVICE_PORT'),
+        'secret'    => env('INVENTORY_SERVICE_SECRET'),
+        'prefix'    => env('INVENTORY_SERVICE_PREFIX')
     ]
 ];
