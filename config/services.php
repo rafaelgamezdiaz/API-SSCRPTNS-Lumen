@@ -11,6 +11,6 @@ return [
         'base_url'  => env('INVENTORY_SERVICE_BASE_URL'),
         'port'      => env('INVENTORY_SERVICE_PORT'),
         'secret'    => env('INVENTORY_SERVICE_SECRET'),
-        'prefix'    => env('INVENTORY_SERVICE_PREFIX')
+        'prefix'    => env('INVENTORY_PREFIX')
     ]
 ];
