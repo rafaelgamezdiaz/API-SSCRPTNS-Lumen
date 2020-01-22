@@ -15,7 +15,7 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->group(['prefix' => 'ct', 'middleware' => 'auth'], function () use ($router) {
+$router->group(['prefix' => 'ct'], function () use ($router) {  // , 'middleware' => 'auth'
 
     // CLIENTS ROUTES
     $router->get('clients/', 'Client\ClientController@index');
@@ -39,3 +39,4 @@ $router->group(['prefix' => 'ct', 'middleware' => 'auth'], function () use ($rou
     });
 
 } );
+

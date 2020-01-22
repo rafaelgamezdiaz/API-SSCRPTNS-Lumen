@@ -1,5 +1,7 @@
 <?php
 
+use Nord\Lumen\Cors\CorsMiddleware;
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
@@ -65,13 +67,12 @@ $app->singleton(
 |
 */
 
-// $app->middleware([
-//     App\Http\Middleware\ExampleMiddleware::class
-// ]);
-
  $app->routeMiddleware([
      'auth' => App\Http\Middleware\Authenticate::class,
  ]);
+
+ // CORS
+ $app->middleware(['Nord\Lumen\Cors\CorsMiddleware']);
 
 /*
 |--------------------------------------------------------------------------
@@ -84,10 +85,11 @@ $app->singleton(
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AppServiceProvider::class);
 if (env('APP_ENV') != 'production' || env('APP_ENV') == 'local') {
     $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 }
+$app->register('Nord\Lumen\Cors\CorsServiceProvider');
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 

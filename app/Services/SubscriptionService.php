@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
 use http\Env\Request;
+use Illuminate\Support\Facades\Log;
 use Laravel\Lumen\Routing\ProvidesConvenienceMethods;
 
 class SubscriptionService
@@ -24,12 +25,12 @@ class SubscriptionService
     {
         if (isset($_GET['where'])) {
             $subscriptions = Subscription::doWhere($request)
-                                         ->where('account', $this->getAccount($request))
+                                         ->where('account', $this->account())
                                          ->orderBy('created_at', 'desc')
                                          ->get();
         }
         else{
-            $subscriptions = Subscription::where('account', $this->getAccount($request))
+            $subscriptions = Subscription::where('account', $this->account())
                                          ->orderBy('created_at', 'desc')
                                          ->get();
         }
@@ -42,6 +43,17 @@ class SubscriptionService
             });
         });
         return $subscriptions;
+    }
+
+    public function account()
+    {
+        if ( isset($_GET['account'])) {
+            return $_GET['account'];
+        }
+        return null;
+
+        // Use this if token validatios is activated for this api
+        // return $this->getAccount($request)
     }
 
     /**
@@ -57,7 +69,7 @@ class SubscriptionService
         // Validations
         $this->validate($request, $subscription->rules());
         $subscription->fill($request->all());
-        $subscription->account = $this->getAccount($request);
+        //$subscription->account = $this->getAccount($request);
 
         if ($subscription->checkCode($request->code)) {
             if ($subscription->save()) {

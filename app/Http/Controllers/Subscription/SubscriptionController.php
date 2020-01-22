@@ -10,6 +10,7 @@ use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SubscriptionController extends Controller
 {
