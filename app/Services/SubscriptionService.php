@@ -5,6 +5,7 @@ namespace App\Services;
 
 
 use App\Models\Subscription;
+use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
 use http\Env\Request;
@@ -31,15 +32,17 @@ class SubscriptionService
         }
         else{
             $subscriptions = Subscription::where('account', $this->account())
-                                         ->orderBy('created_at', 'desc');
-                                       //  ->get();
+                                         ->orderBy('created_at', 'desc')
+                                         ->get();
         }
-        // Get Clients and Products (or Services) for the Subscription
         $subscriptions->each(function($subscriptions) use($clientService, $productService){
-            $subscriptions->client = $clientService->getClient($subscriptions->client_id);
+            // Getting the Client Info
+            $subscriptions->client = $clientService->getClient($subscriptions->client_id, false);
+
+            // Getting the Produc or Service Info
             $temp = $subscriptions->subscriptionDetails;
             $temp->each(function($temp) use ($productService){
-                $temp->product = $productService->getProduct($temp->product_id);
+                $temp->product = $productService->getProduct($temp->product_id, false);
             });
         });
         return $subscriptions;
@@ -80,6 +83,21 @@ class SubscriptionService
             return $this->errorMessage('Sorry. Something happends when trying to save the subscription!', 409);
         }
         return $this->errorMessage('This code is not available!', 409);
+    }
+
+    /**
+     * Return the Subscription Details (Producst ans services included in the subscription)
+     * @param $id
+     * @return mixed
+     */
+    public function show($id, $productService)
+    {
+        $subscription = Subscription::findOrFail($id);
+        $subscription_details = $subscription->subscriptionDetails;
+        $subscription_details->each(function($subscription_details) use($productService) {
+            $subscription_details->product = $productService->getProduct($subscription_details->product_id, false);
+        });
+        return $subscription_details;
     }
 
     /**
@@ -132,5 +150,26 @@ class SubscriptionService
     public function changeStatus($status)
     {
         return ($status == Subscription::SUBSCRIPTION_ACTIVE) ? Subscription::SUBSCRIPTION_ACTIVE : Subscription::SUBSCRIPTION_INACTIVE;
+    }
+
+    public function querySubscription($request, $clientService, $productService)
+    {
+        $subscriptions = Subscription::whereIn('id', $request->ids);
+        if ($request->has('where')){
+            $subscriptions = $subscriptions->doWhere($request->input('where'));
+        }
+        $subscriptions = $subscriptions->orderByDesc('created_at')
+                                        ->get();
+        $subscriptions = $subscriptions->each(function($subscriptions) use ($clientService, $productService){
+            // Getting Clients
+            $subscriptions->client = $clientService->getClient($subscriptions->client_id);
+
+            // Getting Products
+            $subscriptions_details = $subscriptions->subscriptionDetails;
+            $subscriptions_details->each(function($subscriptions_details) use($productService) {
+                $subscriptions_details->product = $productService->getProduct($subscriptions_details->product_id);
+            });
+        });
+        return $subscriptions;
     }
 }

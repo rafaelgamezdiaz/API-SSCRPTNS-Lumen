@@ -26,7 +26,6 @@ class SubscriptionController extends Controller
     public function index(Request $request, ClientService $clientService, ProductService $productService, SubscriptionService $subscriptionService)
     {
         $subscriptions = $subscriptionService->index($request, $clientService, $productService);
-        //return response()->json($subscriptions);
         return $this->dataResponse($subscriptions);
     }
 
@@ -42,6 +41,11 @@ class SubscriptionController extends Controller
     public function store(Request $request, Subscription $subscription, ProductService $productService, SubscriptionService $subscriptionService)
     {
         return $subscriptionService->store($request, $subscription, $productService);
+    }
+
+    public function show($id, SubscriptionService $subscriptionService, ProductService $productService)
+    {
+        return $subscriptionService->show($id, $productService);
     }
 
     /**

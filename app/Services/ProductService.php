@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class ProductService
 {
@@ -120,20 +121,21 @@ class ProductService
      * @param $id
      * @return mixed
      */
-    public function getProduct($id)
+    public function getProduct($id, $fullInfo = true)
     {
         $endpoint = '/products/'.$id;
         $url = $this->getURL().$endpoint;
         $product = $this->performRequest('GET',$url,null,[]);
         $product = collect($product)->recursive();
 
-        // Returns Some Products (or Services) Info
-        $product = $product->first()->pluck('name');
-        //$product = $product->first()->first()->only(['name']);
-
         // Returns Full Products (or Services) Info
-        //$product = collect($product)->first();
-
+        if ($fullInfo) {
+            return collect($product)->first();
+        }
+        // Returns Some Products (or Services) Info
+        if ($product->first() !== true and $product->first() !== false ) {
+            $product = $product->first()->first()->only(['name', 'sale_price']);
+        }
         return $product;
     }
 }

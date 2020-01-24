@@ -9,7 +9,11 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
+use App\Services\ClientService;
+use App\Services\ProductService;
 use App\Services\ReportService;
+use App\Services\SubscriptionService;
+use function foo\func;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -26,24 +30,51 @@ class ReportController extends Controller
         $this->reportService = $reportService;
     }
 
-    /**
-     * @param Request $request
-     * @return \Dompdf\Dompdf|\Illuminate\Http\JsonResponse|string|null
-     */
-    public function automatic(Request $request)
+    public function report(Request $request, SubscriptionService $subscriptionService, ClientService $clientService, ProductService $productService)
     {
-        $index= [$request->index];
-        $info = $this->sortByDate([$request->data]);
-        $name_date = $this->dateToStr($info[0]);
+        $info = $subscriptionService->querySubscription($request, $clientService, $productService);
+        $index = [
+            "Id"                    =>"id",
+            "Code"                  =>"code",
+            "Fecha Inicio"          =>"date_start",
+            "Fecha Fin"             =>"date_end",
+            "Ciclo de Facturacion"  =>"billing_cycle",
+            "Estado"                =>"status",
+            "Cliente"               =>"name",
+            "Product"               =>"product",
+            "Price"                 =>"sale_price"
+        ];
+        $info = $this->buildReportTable($info);
         $report = (new ReportService());
-        $name = $request->has('name') ? $request->input('name') : "Report_".$name_date;
-        $report->indexPerSheet($index);
-        $report->dataPerSheet($info);
-        $report->data($request->data);
-        $report->index($request->index);
-        $report->external();
-        $report->transmissionRaw();
-        return $report->report("automatic",$name,"",null,false,1);
+        $report->indexPerSheet([$index]);
+        $report->dataPerSheet([$info]);
+        $report->index($index);
+        $report->data($info);
+
+        return $report->report("automatic","Report",null,null,false,1);
+    }
+
+    private function buildReportTable($info){
+        $table = array();
+        $info = collect($info)->recursive();
+        foreach ($info as $i){
+
+            foreach ($i['subscription_details'] as $product)
+            {
+                array_push($table, [
+                                            'Id'                    => $i['id'],
+                                            'Code'                  => $i['code'],
+                                            'Fecha Inicio'          => $i['date_start'],
+                                            'Fecha Fin'             => $i['date_end'],
+                                            'Ciclo de Facturacion'  => $i['billing_cycle'],
+                                            'Estado'                => $i['status'],
+                                            'Cliente'               => $i['client']['name'].' '.$i['client']['last_name'],
+                                            'Product'               => $product['product'][0]['name'],
+                                            'Price'                 => $product['product'][0]['sale_price']
+                                           ]);
+            }
+        }
+        return $table;
     }
 
     private function dateToStr($info){
@@ -67,4 +98,26 @@ class ReportController extends Controller
         $infoSorted = collect($info[0])->sortBy('date_start')->values()->all();
         return [$infoSorted];
     }
+
+
+    /**
+     * @param Request $request
+     * @return \Dompdf\Dompdf|\Illuminate\Http\JsonResponse|string|null
+     */
+    /*
+    public function automatic(Request $request)
+    {
+        $index= [$request->index];
+        $info = $this->sortByDate([$request->data]);
+        $name_date = $this->dateToStr($info[0]);
+        $report = (new ReportService());
+        $name = $request->has('name') ? $request->input('name') : "Report_".$name_date;
+        $report->indexPerSheet($index);
+        $report->dataPerSheet($info);
+        $report->data($request->data);
+        $report->index($request->index);
+        $report->external();
+        $report->transmissionRaw();
+        return $report->report("automatic",$name,"",null,false,1);
+    }*/
 }

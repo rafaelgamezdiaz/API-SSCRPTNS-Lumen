@@ -13,7 +13,6 @@ class SubscriptionDetail extends Model
 
     protected $hidden = [
         'subscription_id',
-        'product_id',
         'deleted_at',
         'created_at',
         'updated_at'

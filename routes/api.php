@@ -27,6 +27,7 @@ $router->group(['prefix' => 'sub'], function () use ($router) {  // , 'middlewar
 
     // SUBSCRIPTIONS ROUTES
     $router->get('subscriptions/', 'Subscription\SubscriptionController@index');
+    $router->get('subscriptions/{id}', 'Subscription\SubscriptionController@show');
     $router->post('subscriptions/', 'Subscription\SubscriptionController@store');
     $router->put('subscriptions/{id}', 'Subscription\SubscriptionController@update');
     $router->patch('subscriptions/{id}', 'Subscription\SubscriptionController@update');
@@ -34,9 +35,7 @@ $router->group(['prefix' => 'sub'], function () use ($router) {  // , 'middlewar
     $router->put('subscriptions/{id}/status', 'Subscription\SubscriptionController@status');
 
     // REPORT XLS
-    $router->group(['prefix' => 'report'], function () use ($router) {
-        $router->post('/automatic', 'Report\ReportController@automatic');
-    });
+    $router->post('/report', 'Report\ReportController@report');
 
 } );
 

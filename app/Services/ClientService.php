@@ -40,19 +40,21 @@ class ClientService
      * @param $id
      * @return mixed
      */
-    public function getClient($id)
+    public function getClient($id, $fullInfo = true)
     {
         $endpoint = '/clients/'.$id;
         $url = $this->getURL().$endpoint;
         $client = $this->performRequest('GET',$url,null,[]);
-        $client = collect($client)->recursive(); //only(['name']);//->only(['name','last_name']);//->only(['name', 'last_name']);
-
-        // Returns Some Clients Info
-        $client = $client->first()->only(['name','last_name']);//->only(['name','last_name']);//->only(['name', 'last_name']);
+        $client = collect($client)->recursive();
 
         // Return Full Client Info uncomment the next line
-        //$client = $client->first();
-
+        if ($fullInfo) {
+            return $client->first();
+        }
+        // Returns Some Clients Info
+        if ($client->first() !== true and $client->first() !== false ) {
+            return $client->first()->only(['name','last_name']);
+        }
         return $client;
     }
 

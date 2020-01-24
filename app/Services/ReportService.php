@@ -195,12 +195,13 @@ class ReportService
 
             $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-
             // Add Custom URL
+
             if (self::$external) {
                 $writer->save('./reports/'.self::$name.'.xls');
-                return response()->json(["message"=> env('CUSTOM_URL').'/reports/'.self::$name.'.xls'],200);
+                return response()->json(["message"=> './reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
             }
+
             header('Access-Control-Allow-Origin:*');
             $writer->save("php://output");
 
@@ -317,8 +318,8 @@ class ReportService
         if (self::$returnRaw){
             header('content-type:application/pdf');
             return $pdf->output();
-
         }
+
         $pdf->stream('report.pdf', array('Attachment'=>0));
         return $pdf;
     }
