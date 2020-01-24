@@ -54,7 +54,7 @@ dev_deploy_job:
   script:
     - docker stop devsub-api || true
     - docker rm devsub-api || true
-    - docker run -d --restart always --name devsub-api -p 3010:80 devsub-api
+    - docker run -d --restart always --name devsub-api -p 3020:80 devsub-api
     - docker exec devsub-api php artisan migrate
   when: on_success
   tags:
@@ -68,7 +68,7 @@ dev_rollback_job:
     - docker image tag devsub-api:prev devsub-api:latest
     - docker stop devsub-api || true
     - docker rm devsub-api || true
-    - docker run -d --restart always --name devsub-api -p 3010:80 devsub-api
+    - docker run -d --restart always --name devsub-api -p 3020:80 devsub-api
   when: manual
   tags:
     - devapp
