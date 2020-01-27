@@ -40,7 +40,7 @@ class ReportController extends Controller
             "Fecha Fin"             =>"date_end",
             "Ciclo de Facturacion"  =>"billing_cycle",
             "Estado"                =>"status",
-            "Cliente"               =>"name",
+            "Cliente"               =>"client",
             "Product"               =>"product",
             "Price"                 =>"sale_price"
         ];
@@ -50,7 +50,7 @@ class ReportController extends Controller
         $report->dataPerSheet([$info]);
         $report->index($index);
         $report->data($info);
-
+        $report->external();
         return $report->report("automatic","Report",null,null,false,1);
     }
 
@@ -62,15 +62,15 @@ class ReportController extends Controller
             foreach ($i['subscription_details'] as $product)
             {
                 array_push($table, [
-                                            'Id'                    => $i['id'],
-                                            'Code'                  => $i['code'],
-                                            'Fecha Inicio'          => $i['date_start'],
-                                            'Fecha Fin'             => $i['date_end'],
-                                            'Ciclo de Facturacion'  => $i['billing_cycle'],
-                                            'Estado'                => $i['status'],
-                                            'Cliente'               => $i['client']['name'].' '.$i['client']['last_name'],
-                                            'Product'               => $product['product'][0]['name'],
-                                            'Price'                 => $product['product'][0]['sale_price']
+                                            'id'            => $i['id'],
+                                            'code'          => $i['code'],
+                                            'date_start'    => $i['date_start'],
+                                            'date_end'      => $i['date_end'],
+                                            'billing_cycle' => $i['billing_cycle'],
+                                            'status'        => $i['status'],
+                                            'client'        => $i['client']['name'].' '.$i['client']['last_name'],
+                                            'product'       => $product['product'][0]['name'],
+                                            'sale_price'    => $product['product'][0]['sale_price']
                                            ]);
             }
         }

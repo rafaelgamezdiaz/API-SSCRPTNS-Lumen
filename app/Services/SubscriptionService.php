@@ -154,9 +154,12 @@ class SubscriptionService
 
     public function querySubscription($request, $clientService, $productService)
     {
-        $subscriptions = Subscription::whereIn('id', $request->ids);
+
         if ($request->has('where')){
-            $subscriptions = $subscriptions->doWhere($request->input('where'));
+            $subscriptions = Subscription::doWhere($request)
+                                         ->whereIn('id', $request->ids);
+        }else{
+            $subscriptions = Subscription::whereIn('id', $request->ids);
         }
         $subscriptions = $subscriptions->orderByDesc('created_at')
                                         ->get();
@@ -170,6 +173,7 @@ class SubscriptionService
                 $subscriptions_details->product = $productService->getProduct($subscriptions_details->product_id);
             });
         });
+
         return $subscriptions;
     }
 }
