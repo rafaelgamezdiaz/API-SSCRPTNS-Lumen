@@ -19,6 +19,8 @@ $router->group(['prefix' => 'sub'], function () use ($router) {  // , 'middlewar
 
     // CLIENTS ROUTES
     $router->get('clients/', 'Client\ClientController@index');
+    $router->get('clients/{client_id}/subscriptions', 'Client\ClientSubscriptionController@index');
+
 
     // PRODUCTS ROUTES
     $router->get('products/', 'Product\ProductController@index');

@@ -9,9 +9,9 @@ use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
 use phpDocumentor\Reflection\Types\Boolean;
 
-class ProductService
+class ProductService extends BaseService
 {
-    use ConsumesExternalService, ApiResponser;
+    use ApiResponser;
 
     public function __construct()
     {
@@ -27,13 +27,9 @@ class ProductService
      */
     public function index()
     {
-        $endpoint = '/products';
-        if(isset($_GET['where'])){
-            $endpoint.='?where='.$_GET['where'];
-        }
-        $url = $this->getURL().$endpoint;
-        $products = $this->performRequest('GET',$url,null,[]);
-        $products = collect($products)->first();
+        $endpoint = isset($_GET['where']) ? '/products?where='.$_GET['where'] : '/products';
+        $products = $this->doRequest('GET',  $endpoint)
+                         ->first();
         return $this->successResponse('List of products',$products);
     }
 
@@ -124,9 +120,8 @@ class ProductService
     public function getProduct($id, $fullInfo = true)
     {
         $endpoint = '/products/'.$id;
-        $url = $this->getURL().$endpoint;
-        $product = $this->performRequest('GET',$url,null,[]);
-        $product = collect($product)->recursive();
+        $product = $this->doRequest('GET',  $endpoint)
+                         ->recursive();
 
         // Returns Full Products (or Services) Info
         if ($fullInfo) {

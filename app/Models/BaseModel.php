@@ -16,9 +16,6 @@ class BaseModel extends Model
 
     /**
      * @named Funcion para ejecutar el doWhere en el Modelo para ello recibe dos parametros el query y Request
-     * @param $query
-     * @param $request
-     * @return QueryBuilder
      */
     public function scopeDoWhere($query, $request) {
 
@@ -178,8 +175,6 @@ class BaseModel extends Model
 
     /**
      * @named Funcion para Obtener formateado (Y-m-d h:ia) el Atributo de Createdat
-     * @param $value
-     * @return string
      */
     public function getCreatedAtAttribute($value)
     {
@@ -189,8 +184,6 @@ class BaseModel extends Model
 
     /**
      * @named Funcion para obtener formateado (Y-m-d h:ia) el Atributo de Updatedat
-     * @param $value
-     * @return string
      */
     public function getUpdatedAtAttribute($value)
     {

@@ -12,7 +12,6 @@ class ProductController extends Controller
 
     /**
      * The service to consume the client service
-     * @var
      */
     protected $productService;
 
@@ -23,7 +22,6 @@ class ProductController extends Controller
 
     /**
      * Returns the product List from API-Ventas
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -32,8 +30,6 @@ class ProductController extends Controller
 
     /**
      * Returns a Product or Service from API-Ventas
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {

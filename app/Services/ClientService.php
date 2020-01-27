@@ -4,12 +4,13 @@
 namespace App\Services;
 
 
+use App\Models\Subscription;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
 
-class ClientService
+class ClientService extends BaseService
 {
-    use ConsumesExternalService, ApiResponser;
+    use ApiResponser;
 
     public function __construct()
     {
@@ -21,31 +22,23 @@ class ClientService
 
     /**
      * Returns the List of Clients from API-Clients, corresponding to the actual account
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $endpoint = '/clients';
-        if(isset($_GET['account'])){
-            $endpoint.='?account='.$_GET['account'];
-        }
-        $url = $this->getURL().$endpoint;
-        $clients = $this->performRequest('GET',$url,null,[]);
-        $clients = collect($clients)->first();
+        $endpoint = isset($_GET['account']) ? '/clients?account='.$_GET['account'] : '/clients';
+        $clients = $this->doRequest('GET',  $endpoint)
+                        ->first();
         return $this->successResponse('List of clients',$clients);
     }
 
     /**
      * Returns a Client from API-Clients, by id
-     * @param $id
-     * @return mixed
      */
     public function getClient($id, $fullInfo = true)
     {
         $endpoint = '/clients/'.$id;
-        $url = $this->getURL().$endpoint;
-        $client = $this->performRequest('GET',$url,null,[]);
-        $client = collect($client)->recursive();
+        $client = $this->doRequest('GET',  $endpoint)
+            ->recursive();
 
         // Return Full Client Info uncomment the next line
         if ($fullInfo) {
@@ -57,6 +50,5 @@ class ClientService
         }
         return $client;
     }
-
 
 }
