@@ -26,7 +26,6 @@ class Subscription extends BaseModel
 
     protected $hidden = [
         'client_id',
-        'account',
         'deleted_at',
         'created_at',
         'updated_at'

@@ -31,7 +31,10 @@ $router->group(['prefix' => 'sub'], function () use ($router) {  // , 'middlewar
     $router->post('subscriptions/', 'Subscription\SubscriptionController@store');
     $router->put('subscriptions/{id}', 'Subscription\SubscriptionController@update');
     $router->patch('subscriptions/{id}', 'Subscription\SubscriptionController@update');
-    $router->delete('subscriptions/{id}', 'Subscription\SubscriptionController@destroy');
+    $router->delete('subscriptions/{id}', [
+        'middleware' => ['auth'],
+        'uses'       =>'Subscription\SubscriptionController@destroy'
+    ]);
     $router->put('subscriptions/{id}/status', 'Subscription\SubscriptionController@status');
 
     // REPORT XLS

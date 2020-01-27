@@ -35,7 +35,7 @@ class ReportService
     private static $date;
     private static $user;
     private static $log_url = null;
-    private static $account;
+    private static $account = null;
     private static $orientation = "portrait";
     private static $colors = ["primary"=>'#E92610',"secondary"=>'#f2f2f2',"auxiliary"=>'#ffffff'];
     public static $report;
@@ -54,7 +54,7 @@ class ReportService
     public function report($html, $title, $fi=null, $ff=null, $multisheet=false, $numSheet=null)
     {
         self::$title = $title;
-        self::$name = explode(" ",$title)[0];
+        self::$name = explode(" ",$title)[0].'_'.time();
         self::setImage(rtrim(app()->basePath('public/images/zipi.png'), '/'));
 
         if(isset($_GET['format']))
