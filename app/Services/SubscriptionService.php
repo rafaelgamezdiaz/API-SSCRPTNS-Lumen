@@ -5,6 +5,7 @@ namespace App\Services;
 
 
 use App\Models\Subscription;
+use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
 use Laravel\Lumen\Routing\ProvidesConvenienceMethods;
@@ -29,7 +30,6 @@ class SubscriptionService
                                          ->orderBy('created_at', 'desc')
                                          ->get();
         }
-
         return $this->getClientsAndProducts($subscriptions, $clientService, $productService, false);
     }
 
@@ -46,7 +46,6 @@ class SubscriptionService
         if ($subscription->checkCode($request->code)) {
             if ($subscription->save()) {
                 $productService->store($subscription->id, collect($request->product_id));
-
                 return $this->successResponse('Subscription saved!', $subscription->id);
             }
             return $this->errorMessage('Sorry. Something happends when trying to save the subscription!', 409);
@@ -110,6 +109,24 @@ class SubscriptionService
         return $this->dataResponse($subscriptions);
     }
 
+    /**
+     * Return all the subscriptions o a Client (Advanced Client Filter)
+     */
+    public function subscriptionsByProduct($product_id, $clientService)
+    {
+        $subscription_details = SubscriptionDetail::where('product_id', $product_id)->get();
+        $subscription_details->each(function($subscription_details) use($clientService){
+
+            // Getting the Subscription Info
+            $subscription_details = $subscription_details->subscription;
+
+            // Getting the Client Info
+            $subscription_details->client = $clientService->getClient($subscription_details->client_id, false);
+        });
+
+        return $this->dataResponse($subscription_details);
+    }
+
     public function account()
     {
         if ( isset($_GET['account'])) {
@@ -117,7 +134,7 @@ class SubscriptionService
         }
         return null;
 
-        // Use this if token validatios is activated for this api
+        // Use this if token validation is activated for this api
         // return $this->getAccount($request)
     }
 
@@ -151,7 +168,6 @@ class SubscriptionService
      */
     public function querySubscription($request, $clientService, $productService)
     {
-
         if ($request->has('where')){
             $subscriptions = Subscription::doWhere($request)
                                          ->whereIn('id', $request->ids);
@@ -166,8 +182,10 @@ class SubscriptionService
 
     /**
      * Returns info of Clients and Products for a list of subscriptions (from Customers and Inventary APIs)
+     * $extended = true  --> returns full info
+     * $extended = false --> returns only specifics fields
      */
-    public function getClientsAndProducts($subscriptions, $clientService, $productService, $extended = true)
+    public function getClientsAndProducts($subscriptions, $clientService, $productService, $extended = false)
     {
         return $subscriptions->each(function($subscriptions) use($clientService, $productService, $extended){
             // Getting the Client Info

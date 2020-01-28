@@ -25,6 +25,7 @@ $router->group(['prefix' => 'sub'], function () use ($router) {  // , 'middlewar
     // PRODUCTS ROUTES
     $router->get('products/', 'Product\ProductController@index');
     $router->get('products/{id}', 'Product\ProductController@show');
+    $router->get('products/{product_id}/subscriptions', 'Product\ProductSubscriptionController@index');
 
 
     // SUBSCRIPTIONS ROUTES

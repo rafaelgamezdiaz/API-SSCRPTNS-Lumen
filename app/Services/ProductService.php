@@ -117,20 +117,19 @@ class ProductService extends BaseService
      * @param $id
      * @return mixed
      */
-    public function getProduct($id, $fullInfo = true)
+    public function getProduct($id, $extended)
     {
         $endpoint = '/products/'.$id;
         $product = $this->doRequest('GET',  $endpoint)
-                         ->recursive();
+                         ->recursive()
+                         ->first();
 
-        // Returns Full Products (or Services) Info
-        if ($fullInfo) {
-            return collect($product)->first();
+        if ( $product == false) {
+            return "Error! There is nor connection with API-Inventary";
         }
-        // Returns Some Products (or Services) Info
-        if ($product->first() !== true and $product->first() !== false ) {
-            $product = $product->first()->first()->only(['name', 'sale_price']);
-        }
-        return $product;
+
+        // Returns Produc data. $extended == true --> full info, else returns specific fields.
+        $product_fields = $product->first()->only(['name','sale_price']);
+        return ($extended == true) ? $product : $product_fields;
     }
 }

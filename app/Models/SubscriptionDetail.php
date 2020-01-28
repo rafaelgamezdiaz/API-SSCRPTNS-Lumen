@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SubscriptionDetail extends Model
+class SubscriptionDetail extends BaseModel
 {
     protected $fillable = [
         'subscription_id',
@@ -18,7 +18,7 @@ class SubscriptionDetail extends Model
         'updated_at'
     ];
 
-    public function contract()
+    public function subscription()
     {
         return $this->belongsTo(Subscription::class);
     }

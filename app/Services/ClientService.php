@@ -3,10 +3,8 @@
 
 namespace App\Services;
 
-
-use App\Models\Subscription;
 use App\Traits\ApiResponser;
-use App\Traits\ConsumesExternalService;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class ClientService extends BaseService
 {
@@ -21,7 +19,7 @@ class ClientService extends BaseService
     }
 
     /**
-     * Returns the List of Clients from API-Clients, corresponding to the actual account
+     * Returns the List of Clients from API-Customers, corresponding to the actual account
      */
     public function index()
     {
@@ -32,23 +30,21 @@ class ClientService extends BaseService
     }
 
     /**
-     * Returns a Client from API-Clients, by id
+     * Returns a Client from API-Customers, by id
      */
-    public function getClient($id, $fullInfo = true)
+    public function getClient($id, $extended)
     {
         $endpoint = '/clients/'.$id;
         $client = $this->doRequest('GET',  $endpoint)
-            ->recursive();
+            ->recursive()
+            ->first();
 
-        // Return Full Client Info uncomment the next line
-        if ($fullInfo) {
-            return $client->first();
+        if ( $client == false) {
+            return "Error! There is nor connection with API-Customers";
         }
-        // Returns Some Clients Info
-        if ($client->first() !== true and $client->first() !== false ) {
-            return $client->first()->only(['name','last_name']);
-        }
-        return $client;
+
+        // Returns Client data. $extended == true --> full info, else returns specific fields.
+        $client_fields = $client->only(['name','last_name']);
+        return ($extended == true) ? $client : $client_fields;
     }
-
 }

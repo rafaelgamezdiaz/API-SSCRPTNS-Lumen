@@ -24,6 +24,9 @@ class ClientSubscriptionController extends Controller
         $this->clientService = $clientService;
     }
 
+    /**
+     * Return all Subscriptions for an specific client (advanced filter)
+     */
     public function index(Request $request, $client_id, SubscriptionService $subscriptionService, ClientService $clientService, ProductService $productService)
     {
         return $subscriptionService->subscriptionsByClient($request, $client_id, $clientService, $productService);
