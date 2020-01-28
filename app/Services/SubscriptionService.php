@@ -144,7 +144,7 @@ class SubscriptionService
 
         $subscription = Subscription::findOrFail($id);
         $subscription->status = $this->changeStatus($request->status);
-        if ($subscription->save())
+        if ($subscription->update())
         {
             return $this->successResponse('The Subscription status was updated') ;
         }
