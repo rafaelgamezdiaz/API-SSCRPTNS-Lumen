@@ -41,7 +41,6 @@ class SubscriptionService
         // Validations
         $this->validate($request, $subscription->rules());
         $subscription->fill($request->all());
-        //$subscription->account = $this->getAccount($request);
 
         if ($subscription->checkCode($request->code)) {
             if ($subscription->save()) {
@@ -133,9 +132,6 @@ class SubscriptionService
             return $_GET['account'];
         }
         return null;
-
-        // Use this if token validation is activated for this api
-        // return $this->getAccount($request)
     }
 
     /**
@@ -176,7 +172,6 @@ class SubscriptionService
         }
         $subscriptions = $subscriptions->orderByDesc('created_at')
                                         ->get();
-
         return $this->getClientsAndProducts($subscriptions, $clientService, $productService);
     }
 

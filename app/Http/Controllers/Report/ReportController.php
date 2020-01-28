@@ -69,11 +69,12 @@ class ReportController extends Controller
                                             'billing_cycle' => $i['billing_cycle'],
                                             'status'        => $i['status'],
                                             'client'        => $i['client']['name'].' '.$i['client']['last_name'],
-                                            'product'       => $product['product'][0]['name'],
-                                            'sale_price'    => $product['product'][0]['sale_price']
+                                            'product'       => $product['product']['name'],
+                                            'sale_price'    => $product['product']['sale_price']
                                            ]);
             }
         }
+
         return $table;
     }
 }
