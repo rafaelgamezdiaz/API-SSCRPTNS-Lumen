@@ -4,11 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SubscriptionDetail extends Model
+class SubscriptionDetail extends BaseModel
 {
-    protected $fillable = ['subscription_id','product_id'];
+    protected $fillable = [
+        'subscription_id',
+        'product_id'
+    ];
 
-    public function contract()
+    protected $hidden = [
+        'subscription_id',
+        'deleted_at',
+        'created_at',
+        'updated_at'
+    ];
+
+    public function subscription()
     {
         return $this->belongsTo(Subscription::class);
     }

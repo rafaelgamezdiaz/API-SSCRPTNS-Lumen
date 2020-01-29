@@ -13,6 +13,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use phpDocumentor\Reflection\Types\Self_;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -34,7 +35,7 @@ class ReportService
     private static $date;
     private static $user;
     private static $log_url = null;
-    private static $account;
+    private static $account = null;
     private static $orientation = "portrait";
     private static $colors = ["primary"=>'#E92610',"secondary"=>'#f2f2f2',"auxiliary"=>'#ffffff'];
     public static $report;
@@ -53,7 +54,7 @@ class ReportService
     public function report($html, $title, $fi=null, $ff=null, $multisheet=false, $numSheet=null)
     {
         self::$title = $title;
-        self::$name = explode(" ",$title)[0];
+        self::$name = explode(" ",$title)[0].'_'.time();
         self::setImage(rtrim(app()->basePath('public/images/zipi.png'), '/'));
 
         if(isset($_GET['format']))
@@ -178,34 +179,33 @@ class ReportService
             foreach (self::$index as $title => $value) {
                 $arrayData[0][]=$title;
             }
+            //return self::$data;
             foreach (self::$data as $key){
                 $i=1;
                 $toArray = is_object($key) ? $key : is_array($key) ? (object) $key : null;
                 foreach (self::$index as $title => $value) {
                     $toExcel[$i] = $toArray->$value ?? null;
-                    if (strtolower($title) == 'cantidad a pagar') {
-                        $total_pagado += $toArray->$value;
-                    }
                     $i++;
                 }
                 $arrayData[] = $toExcel;
             }
-
             $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A1')->refreshColumnDimensions();
 
             $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="report.xlsx"');
+            header('Access-Control-Allow-Origin:*');
 
             // Add Custom URL
             if (self::$external) {
                 $writer->save('./reports/'.self::$name.'.xls');
-                return response()->json(["message"=> env('CUSTOM_URL').'/reports/'.self::$name.'.xls'],200);
+                //return response()->json(["message"=>'reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
+                return response()->json(["message"=> env('CUSTOM_URL').'/reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
             }
-            header('Access-Control-Allow-Origin:*');
+
             $writer->save("php://output");
 
             return null;
-
         }catch (Exception $exception){
             Log::critical($exception->getMessage());
             return response()->json(["message"=>"Error al crear el reporte"],500);
@@ -307,19 +307,22 @@ class ReportService
         $canvas->close_object();
         $canvas->add_object($footer,"all");
 
+        // Add Custom URL
         if (self::$external) {
             //$pdf->save('./reports/'.$name.'.pdf');
             $output = $pdf->output();
-            file_put_contents('reports/'.self::$name.'.pdf', $output);
-
-            return response()->json(["message"=>'reports/'.self::$name.'.pdf'],200);
+            file_put_contents('./reports/'.self::$name.'.pdf', $output);
+            return response()->json(["message"=>env('CUSTOM_URL').'/reports/'.self::$name.'.pdf'],200);
         }
+
         if (self::$returnRaw){
             header('content-type:application/pdf');
             return $pdf->output();
-
         }
+
+
         $pdf->stream('report.pdf', array('Attachment'=>0));
+
         return $pdf;
     }
 

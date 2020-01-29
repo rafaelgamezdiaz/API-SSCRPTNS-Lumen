@@ -8,7 +8,6 @@ use App\Services\ProductService;
 use App\Services\SubscriptionService;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
@@ -17,38 +16,28 @@ class SubscriptionController extends Controller
 
     /**
      * Returns all Subscriptions including Client info and Products or Services Info
-     * @param ClientService $clientService
-     * @param ProductService $productService
-     * @param SubscriptionService $subscriptionService
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request, ClientService $clientService, ProductService $productService, SubscriptionService $subscriptionService)
     {
         $subscriptions = $subscriptionService->index($request, $clientService, $productService);
-        return $this->successResponse('List of subscriptions', $subscriptions);
+        return $this->dataResponse($subscriptions);
     }
 
     /**
      * Store a Subscription
-     * @param Request $request
-     * @param Subscription $subscription
-     * @param ProductService $productService
-     * @param SubscriptionService $subscriptionService
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request, Subscription $subscription, ProductService $productService, SubscriptionService $subscriptionService)
     {
         return $subscriptionService->store($request, $subscription, $productService);
     }
 
+    public function show($id, SubscriptionService $subscriptionService, ProductService $productService)
+    {
+        return $subscriptionService->show($id, $productService);
+    }
+
     /**
      * Update a Subscription
-     * @param Request $request
-     * @param $id
-     * @param ProductService $productService
-     * @param SubscriptionService $subscriptionService
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id, ProductService $productService, SubscriptionService $subscriptionService)
     {
@@ -57,8 +46,6 @@ class SubscriptionController extends Controller
 
     /**
      * Remove a Subscription
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id, SubscriptionService $subscriptionService)
     {

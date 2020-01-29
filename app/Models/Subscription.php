@@ -24,11 +24,18 @@ class Subscription extends BaseModel
             'billing_cycle'
     ];
 
+    protected $hidden = [
+        'deleted_at',
+        'created_at',
+        'updated_at'
+    ];
+
     protected $client_name;
 
     public function rules()
     {
         return [
+            'account'         => 'required|numeric',
             'code'            => 'required',
             'client_id'       => 'required|numeric',
             'date_start'      => 'required',

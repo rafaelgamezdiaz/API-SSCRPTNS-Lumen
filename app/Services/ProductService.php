@@ -7,10 +7,11 @@ namespace App\Services;
 use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
+use phpDocumentor\Reflection\Types\Boolean;
 
-class ProductService
+class ProductService extends BaseService
 {
-    use ConsumesExternalService, ApiResponser;
+    use ApiResponser;
 
     public function __construct()
     {
@@ -26,14 +27,9 @@ class ProductService
      */
     public function index()
     {
-        $endpoint = '/products';
-        if(isset($_GET['where'])){
-            $endpoint.='?where='.$_GET['where'];
-        }
-        $url = $this->getURL().$endpoint;
-        $products = $this->performRequest('GET',$url,null,[]);
-        $products = collect($products)->first();
-
+        $endpoint = isset($_GET['where']) ? '/products?where='.$_GET['where'] : '/products';
+        $products = $this->doRequest('GET',  $endpoint)
+                         ->first();
         return $this->successResponse('List of products',$products);
     }
 
@@ -121,13 +117,19 @@ class ProductService
      * @param $id
      * @return mixed
      */
-    public function getProduct($id)
+    public function getProduct($id, $extended)
     {
         $endpoint = '/products/'.$id;
-        $url = $this->getURL().$endpoint;
-        $product = $this->performRequest('GET',$url,null,[]);
-        return collect($product)->first();
+        $product = $this->doRequest('GET',  $endpoint)
+                         ->recursive()
+                         ->first();
+
+        if ( $product == false) {
+            return "Error! There is nor connection with API-Inventary";
+        }
+
+        // Returns Produc data. $extended == true --> full info, else returns specific fields.
+        $product_fields = $product->first()->only(['name','sale_price']);
+        return ($extended == true) ? $product : $product_fields;
     }
-
-
 }

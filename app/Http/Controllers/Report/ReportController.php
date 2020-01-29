@@ -9,7 +9,10 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
+use App\Services\ClientService;
+use App\Services\ProductService;
 use App\Services\ReportService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -17,7 +20,6 @@ class ReportController extends Controller
 
     /**
      * The service to consume the client service
-     * @var
      */
     protected $reportService;
 
@@ -27,44 +29,52 @@ class ReportController extends Controller
     }
 
     /**
-     * @param Request $request
-     * @return \Dompdf\Dompdf|\Illuminate\Http\JsonResponse|string|null
+     * Returns the Subscriptions Report
      */
-    public function automatic(Request $request)
+    public function report(Request $request, SubscriptionService $subscriptionService, ClientService $clientService, ProductService $productService)
     {
-        $index= [$request->index];
-        $info = $this->sortByDate([$request->data]);
-        $name_date = $this->dateToStr($info[0]);
+        $info = $subscriptionService->querySubscription($request, $clientService, $productService);
+        $index = [
+            "Id"                    =>"id",
+            "Code"                  =>"code",
+            "Fecha Inicio"          =>"date_start",
+            "Fecha Fin"             =>"date_end",
+            "Ciclo de Facturacion"  =>"billing_cycle",
+            "Estado"                =>"status",
+            "Cliente"               =>"client",
+            "Product"               =>"product",
+            "Price"                 =>"sale_price"
+        ];
+        $info = $this->buildReportTable($info);
         $report = (new ReportService());
-        $name = $request->has('name') ? $request->input('name') : "Report_".$name_date;
-        $report->indexPerSheet($index);
-        $report->dataPerSheet($info);
-        $report->data($request->data);
-        $report->index($request->index);
+        $report->indexPerSheet([$index]);
+        $report->dataPerSheet([$info]);
+        $report->index($index);
+        $report->data($info);
         $report->external();
-        $report->transmissionRaw();
-        return $report->report("automatic",$name,"",null,false,1);
+        return $report->report("automatic","Report",null,null,false,1);
     }
 
-    private function dateToStr($info){
-        if (count($info) > 0) {
-            $dateIni = $info[0]['date_start'];
-            $dateEnd = $info[count($info)-1]['date_end'];
+    private function buildReportTable($info){
+        $table = array();
+        $info = collect($info)->recursive();
+        foreach ($info as $i){
+            foreach ($i['subscription_details'] as $product)
+            {
+                array_push($table, [
+                                            'id'            => $i['id'],
+                                            'code'          => $i['code'],
+                                            'date_start'    => $i['date_start'],
+                                            'date_end'      => $i['date_end'],
+                                            'billing_cycle' => $i['billing_cycle'],
+                                            'status'        => $i['status'],
+                                            'client'        => $i['client']['name'].' '.$i['client']['last_name'],
+                                            'product'       => $product['product']['name'],
+                                            'sale_price'    => $product['product']['sale_price']
+                                           ]);
+            }
         }
-        return $this->formatDateToString($dateIni, $dateEnd);
-    }
 
-    private function formatDateToString($dateIni, $dateEnd){
-        $date_ini = explode(' ',$dateIni)[0];
-        $date_ini = implode(explode('-',$date_ini));
-        $date_end = explode(' ',$dateEnd)[0];
-        $date_end = implode(explode('-',$date_end));
-        return $date_ini != $date_end ? '_'.$date_ini.'_'.$date_end : '_'.$date_ini;
-    }
-
-
-    private function sortByDate($info){
-        $infoSorted = collect($info[0])->sortBy('date_start')->values()->all();
-        return [$infoSorted];
+        return $table;
     }
 }
