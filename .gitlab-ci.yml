@@ -28,7 +28,7 @@ dev_build_job:
     - sed -i -e "s;^\s*DB_DATABASE=.*;DB_DATABASE=devsub;g" .env
     - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=devsub;g" .env
     - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$DEV_DB_PASS;g" .env
-    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://devsub.zippyttech.com/sub;g" .env
+    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://devsub.zippyttech.com/;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_BASE_URL=.*;USERS_SERVICE_BASE_URL=https://devus.zippyttech.com;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_PORT=.*;USERS_SERVICE_PORT=;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_SECRET=.*;USERS_SERVICE_SECRET=;g" .env
@@ -97,7 +97,7 @@ qa_build_job:
     - sed -i -e "s;^\s*DB_DATABASE=.*;DB_DATABASE=qasub;g" .env
     - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=qasub;g" .env
     - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$QA_DB_PASS;g" .env
-    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://qasub.zippyttech.com/sub;g" .env
+    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://qasub.zippyttech.com/;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_BASE_URL=.*;USERS_SERVICE_BASE_URL=https://qaus.zippyttech.com;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_PORT=.*;USERS_SERVICE_PORT=;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_SECRET=.*;USERS_SERVICE_SECRET=;g" .env
@@ -166,7 +166,7 @@ prod_build_job:
     - sed -i -e "s;^\s*DB_DATABASE=.*;DB_DATABASE=sub;g" .env
     - sed -i -e "s;^\s*DB_USERNAME=.*;DB_USERNAME=sub;g" .env
     - sed -i -e "s;^\s*DB_PASSWORD=.*;DB_PASSWORD=$PROD_DB_PASS;g" .env
-    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://sub.zippyttech.com/sub;g" .env
+    - sed -i -e "s;^\s*CUSTOM_URL=.*;CUSTOM_URL=https://sub.zippyttech.com/;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_BASE_URL=.*;USERS_SERVICE_BASE_URL=https://us.zippyttech.com;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_PORT=.*;USERS_SERVICE_PORT=;g" .env
     - sed -i -e "s;^\s*USERS_SERVICE_SECRET=.*;USERS_SERVICE_SECRET=;g" .env
