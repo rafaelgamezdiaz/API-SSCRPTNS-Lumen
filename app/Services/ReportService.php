@@ -194,7 +194,7 @@ class ReportService
             $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment; filename="report.xlsx"');
-            header('Access-Control-Allow-Origin:*');
+            //header('Access-Control-Allow-Origin:*');
 
             // Add Custom URL
             if (self::$external) {
