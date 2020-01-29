@@ -195,8 +195,8 @@ class ReportService
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment; filename="report.xlsx"');
             header('Access-Control-Allow-Origin:*');
-            // Add Custom URL
 
+            // Add Custom URL
             if (self::$external) {
                 $writer->save('./reports/'.self::$name.'.xls');
                 //return response()->json(["message"=>'reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
@@ -307,12 +307,12 @@ class ReportService
         $canvas->close_object();
         $canvas->add_object($footer,"all");
 
+        // Add Custom URL
         if (self::$external) {
             //$pdf->save('./reports/'.$name.'.pdf');
             $output = $pdf->output();
-            file_put_contents('reports/'.self::$name.'.pdf', $output);
-
-            return response()->json(["message"=>'reports/'.self::$name.'.pdf'],200);
+            file_put_contents('./reports/'.self::$name.'.pdf', $output);
+            return response()->json(["message"=>env('CUSTOM_URL').'/reports/'.self::$name.'.pdf'],200);
         }
 
         if (self::$returnRaw){
