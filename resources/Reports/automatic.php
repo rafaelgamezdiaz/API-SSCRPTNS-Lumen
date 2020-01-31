@@ -34,7 +34,8 @@
 </style>
 <body>
     <div>
-        <div style="text-align: center;">
+        <img  style="width: 80px;float: right;" src="<?= $logo ?>" alt="Logo" ><br>
+        <div style="text-align: center;margin-top: 90px;">
             <h2>Reporte de Subscripciones</h2>
         </div>
 
