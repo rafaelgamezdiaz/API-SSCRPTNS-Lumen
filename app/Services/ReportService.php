@@ -173,13 +173,15 @@ class ReportService
             $toExcel = $arrayData = [];
             $spreadsheet = new Spreadsheet();
             $pathLogo = self::$log_url;
-            $sheet = self::getDefaultConfiguration($spreadsheet,$pathLogo, 'A',1);
+
+            $sheet = self::getDefaultConfiguration($spreadsheet,$pathLogo);
 
             //Parsear la información a pasar
             foreach (self::$index as $title => $value) {
                 $arrayData[0][]=$title;
             }
             //return self::$data;
+            $total_operaciones = 0;
             foreach (self::$data as $key){
                 $i=1;
                 $toArray = is_object($key) ? $key : is_array($key) ? (object) $key : null;
@@ -187,9 +189,14 @@ class ReportService
                     $toExcel[$i] = $toArray->$value ?? null;
                     $i++;
                 }
+                $total_operaciones++;
                 $arrayData[] = $toExcel;
             }
-            $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A1')->refreshColumnDimensions();
+            $arrayData[] = ['Total de Operaciones', $total_operaciones];
+
+            $sheet->getActiveSheet()->setCellValue("A6","Total de Operaciones: ");
+            $sheet->getActiveSheet()->setCellValue("B6",$total_operaciones); //->refreshColumnDimensions();
+            $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A8');
 
             $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -199,7 +206,6 @@ class ReportService
             // Add Custom URL
             if (self::$external) {
                 $writer->save('./reports/'.self::$name.'.xls');
-                //return response()->json(["message"=>'reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
                 return response()->json(["message"=> env('CUSTOM_URL').'/reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
             }
 
@@ -426,15 +432,37 @@ class ReportService
                     ->setAutoSize(true);
             }
 
-            $spreadsheet->getActiveSheet()
-                ->getStyle($columnStart.$rowStart.':'.$alphabet[$totalColumns].'1')
-                ->getFill()
-                ->setFillType(Fill::FILL_SOLID);
-            $spreadsheet->getActiveSheet()
-                ->getStyle('A1:'.$alphabet[$totalColumns].'1')
-                ->getFont()
-                ->getColor()
-                ->setARGB('00000000');
+            $spreadsheet->getActiveSheet()->setCellValue($columnStart.$rowStart,"Reporte de " . self::$title);
+            $spreadsheet->getActiveSheet()->mergeCells($columnStart.$rowStart.':'.$alphabet[$totalColumns] . '5');
+            $spreadsheet->getActiveSheet()->getStyle($columnStart.$rowStart)->getFont()->setSize(16);
+            $spreadsheet->getActiveSheet()->getStyle($columnStart.$rowStart)->getAlignment()
+                ->applyFromArray([
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ]);
+
+            $spreadsheet->getActiveSheet()->getStyle($columnStart.$totalRows.':' . $alphabet[$totalColumns] . $totalRows)
+                ->applyFromArray([
+                    'borders' => [
+                        'outline' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ]);
+            $spreadsheet->getActiveSheet()->getStyle($columnStart.$rowStart.':'.$alphabet[$totalColumns].'1')->getFill()->setFillType(Fill::FILL_SOLID);
+            $spreadsheet->getActiveSheet()->getStyle('A1:'.$alphabet[$totalColumns].'1')->getFont()->getColor()->setARGB('00000000');
+
+            if ($pathLogo){
+                $drawing = new Drawing();
+                $drawing->setName('Logo');
+                $drawing->setDescription('Logo');
+                $drawing->setPath($pathLogo);
+                $drawing->setHeight(30);
+                $drawing->setWidth(100);
+                $drawing->setCoordinates($alphabet[$totalColumns-1].$rowStart);
+                $drawing->setWorksheet($spreadsheet->getActiveSheet());
+            }
             return $spreadsheet;
         }catch (Exception $exception){
             Log::critical($exception->getMessage() . $exception->getLine() . $exception->getFile());

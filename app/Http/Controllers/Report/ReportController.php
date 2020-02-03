@@ -42,8 +42,8 @@ class ReportController extends Controller
             "Ciclo de Facturacion"  =>"billing_cycle",
             "Estado"                =>"status",
             "Cliente"               =>"client",
-            "Product"               =>"product",
-            "Price"                 =>"sale_price"
+            "Producto"               =>"product",
+            "Precio"                 =>"sale_price"
         ];
         $info = $this->buildReportTable($info);
         $report = (new ReportService());
@@ -52,7 +52,10 @@ class ReportController extends Controller
         $report->index($index);
         $report->data($info);
         $report->external();
-        return $report->report("automatic","Report",null,null,false,1);
+        $report->transmissionRaw();
+
+
+        return $report->report("automatic","Subscripciones",null,null,false,1);
     }
 
     private function buildReportTable($info){
@@ -68,7 +71,7 @@ class ReportController extends Controller
                                             'date_end'      => $i['date_end'],
                                             'billing_cycle' => $i['billing_cycle'],
                                             'status'        => $i['status'],
-                                            'client'        => $i['client']['name'].' '.$i['client']['last_name'],
+                                            'client'        => $i['client']['commerce_name'],
                                             'product'       => $product['product']['name'],
                                             'sale_price'    => $product['product']['sale_price']
                                            ]);
