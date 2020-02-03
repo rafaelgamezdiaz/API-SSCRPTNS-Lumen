@@ -44,7 +44,7 @@ class SubscriptionService
 
         if ($subscription->checkCode($request->code)) {
             if ($subscription->save()) {
-                $productService->store($subscription->id, collect($request->product_id));
+                $productService->store($request, $subscription->id, collect($request->product_id));
                 return $this->successResponse('Subscription saved!', $subscription->id);
             }
             return $this->errorMessage('Sorry. Something happends when trying to save the subscription!', 409);

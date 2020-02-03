@@ -7,11 +7,12 @@ namespace App\Services;
 use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
+use function foo\func;
 use phpDocumentor\Reflection\Types\Boolean;
 
 class ProductService extends BaseService
 {
-    use ApiResponser;
+    use ConsumesExternalService, ApiResponser;
 
     public function __construct()
     {
@@ -39,12 +40,15 @@ class ProductService extends BaseService
      * @param $products_id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store($subscription_id, $products_id)
+    public function store($request, $subscription_id, $products)
     {
         // Add Products or Services to the Subscription
-        $products_id->each(function($products_id) use ($subscription_id) {
-            $this->addProduct($subscription_id, $products_id);
-        });
+        foreach ($products as $product)
+        {
+            $product = $this->getProductByName($request, $product, false);
+            $this->addProduct($subscription_id, $product['id']);
+        }
+
         return $this->successResponse('Subscriptions were saved');
     }
 
@@ -130,6 +134,22 @@ class ProductService extends BaseService
 
         // Returns Produc data. $extended == true --> full info, else returns specific fields.
         $product_fields = $product->first()->only(['name','sale_price']);
+        return ($extended == true) ? $product : $product_fields;
+    }
+
+    public function getProductByName($request, $name, $extended = true)
+    {
+        $endpoint = '/products?where=[{"op":"eq","field":"p.name", "value":"'.$name.'"},{"op":"eq", "field":"p.account", "value":'.$request->account.'}]';
+        $product = $this->doRequest('GET',  $endpoint)
+            ->recursive()
+            ->first();
+
+        if ( $product == false) {
+            return "Error! There is nor connection with API-Inventary";
+        }
+
+        // Returns Produc data. $extended == true --> full info, else returns specific fields.
+        $product_fields = $product->first()->only(['id']);
         return ($extended == true) ? $product : $product_fields;
     }
 }

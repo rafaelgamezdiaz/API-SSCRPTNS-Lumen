@@ -173,8 +173,6 @@ class ReportService
             $toExcel = $arrayData = [];
             $spreadsheet = new Spreadsheet();
             $pathLogo = self::$log_url;
-           // $sheet = self::getDefaultConfiguration($spreadsheet,$pathLogo, 'A',1);
-
 
             $sheet = self::getDefaultConfiguration($spreadsheet,$pathLogo);
 
@@ -197,11 +195,7 @@ class ReportService
             $arrayData[] = ['Total de Operaciones', $total_operaciones];
 
             $sheet->getActiveSheet()->setCellValue("A6","Total de Operaciones: ");
-            $sheet->getActiveSheet()->setCellValue("B6",$total_operaciones);
-            //$sheet->getActiveSheet()->setCellValue("C6",'Usuario: ');
-            //$sheet->getActiveSheet()->setCellValue("D6",self::$username);
-
-            //$sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A5')->refreshColumnDimensions();
+            $sheet->getActiveSheet()->setCellValue("B6",$total_operaciones); //->refreshColumnDimensions();
             $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A8');
 
             $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
@@ -209,13 +203,9 @@ class ReportService
             header('Content-Disposition: attachment; filename="report.xlsx"');
             //header('Access-Control-Allow-Origin:*');
 
-
-
-
             // Add Custom URL
             if (self::$external) {
                 $writer->save('./reports/'.self::$name.'.xls');
-                //return response()->json(["message"=>'reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
                 return response()->json(["message"=> env('CUSTOM_URL').'/reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
             }
 
@@ -462,8 +452,6 @@ class ReportService
                 ]);
             $spreadsheet->getActiveSheet()->getStyle($columnStart.$rowStart.':'.$alphabet[$totalColumns].'1')->getFill()->setFillType(Fill::FILL_SOLID);
             $spreadsheet->getActiveSheet()->getStyle('A1:'.$alphabet[$totalColumns].'1')->getFont()->getColor()->setARGB('00000000');
-
-
 
             if ($pathLogo){
                 $drawing = new Drawing();

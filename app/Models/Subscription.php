@@ -12,8 +12,8 @@ class Subscription extends BaseModel
     use ConsumesExternalService;
     use SoftDeletes;
 
-    const SUBSCRIPTION_ACTIVE = 'Activo';
-    const SUBSCRIPTION_INACTIVE = 'Inactivo';
+    const SUBSCRIPTION_ACTIVE = 'Activa';
+    const SUBSCRIPTION_INACTIVE = 'Inactiva';
 
     protected $fillable = [
             'account',
