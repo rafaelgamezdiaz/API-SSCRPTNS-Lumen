@@ -34,6 +34,7 @@ class ReportController extends Controller
     public function report(Request $request, SubscriptionService $subscriptionService, ClientService $clientService, ProductService $productService)
     {
         $info = $subscriptionService->querySubscription($request, $clientService, $productService);
+
         $index = [
             "Id"                    =>"id",
             "Code"                  =>"code",

@@ -40,6 +40,11 @@ class SubscriptionService
     {
         // Validations
         $this->validate($request, $subscription->rules());
+
+        if (count($request->product_id) == 0) {
+            return $this->errorMessage('Debe seleccionar al menos un producto o servicio!', 400);
+        }
+
         $subscription->fill($request->all());
 
         if ($subscription->checkCode($request->code)) {
