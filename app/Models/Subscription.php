@@ -82,9 +82,4 @@ class Subscription extends BaseModel
         return $this->active == self::SUBSCRIPTION_ACTIVE;
     }
 
-    public function getDateFormat()
-    {
-        return 'd.m.Y H:i:s';
-    }
-
 }
