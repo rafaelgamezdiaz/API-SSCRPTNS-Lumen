@@ -371,12 +371,6 @@ class ReportService
                 $ff = date('Y-m-d', strtotime('next monday'));
                 $fi = $dt->isMonday() ? date('Y-m-d', $dt) : date('Y-m-d', strtotime("last Monday"));
             }
-            /*if (strtotime($fi) AND strtotime($ff)){
-                $spreadsheetCsv->getActiveSheet()->setCellValue("A4","Desde: ");
-                $spreadsheetCsv->getActiveSheet()->setCellValue("B4",$fi);
-                $spreadsheetCsv->getActiveSheet()->setCellValue("C4",'Hasta: ');
-                $spreadsheetCsv->getActiveSheet()->setCellValue("D4","$ff");
-            }*/
 
             //Parsear la información a pasar
             foreach (self::$index as $title => $value) {

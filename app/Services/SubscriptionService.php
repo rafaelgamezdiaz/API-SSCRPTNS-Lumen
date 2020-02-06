@@ -104,6 +104,7 @@ class SubscriptionService
     {
         if (isset($_GET['where'])) {
             $subscriptions = Subscription::doWhere($request)->where('client_id', $client_id)->get();
+            // 'name', 'like', '%' . Input::get('name') . '%'
         }
         else
         {

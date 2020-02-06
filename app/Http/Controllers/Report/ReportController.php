@@ -56,7 +56,7 @@ class ReportController extends Controller
         $report->transmissionRaw();
 
 
-        return $report->report("automatic","Subscripciones",null,null,false,1);
+        return $report->report("automatic","Suscripciones",null,null,false,1);
     }
 
     private function buildReportTable($info){

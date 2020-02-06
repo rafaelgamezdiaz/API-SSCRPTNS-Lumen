@@ -5,11 +5,14 @@ namespace App\Models;
 
 
 use App\Query\QueryBuilder;
+use App\Traits\doWhereTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class BaseModel extends Model
 {
+    use doWhereTrait;
+
     protected $modelo;
     protected $fillable = ['*'];
 
