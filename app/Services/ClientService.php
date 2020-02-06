@@ -44,7 +44,7 @@ class ClientService extends BaseService
         }
 
         // Returns Client data. $extended == true --> full info, else returns specific fields.
-        $client_fields = $client->only(['commerce_name']);
+        $client_fields = $client->only(['commerce_name', 'image']);
         return ($extended == true) ? $client : $client_fields;
     }
 }

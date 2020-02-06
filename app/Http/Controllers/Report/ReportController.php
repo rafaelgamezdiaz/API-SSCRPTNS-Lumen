@@ -34,10 +34,9 @@ class ReportController extends Controller
     public function report(Request $request, SubscriptionService $subscriptionService, ClientService $clientService, ProductService $productService)
     {
         $info = $subscriptionService->querySubscription($request, $clientService, $productService);
-
         $index = [
-            "Id"                    =>"id",
-            "Code"                  =>"code",
+            "Item"                  =>"id",
+            "Número de suscripción" =>"code",
             "Fecha Inicio"          =>"date_start",
             "Fecha Fin"             =>"date_end",
             "Ciclo de Facturacion"  =>"billing_cycle",
@@ -52,9 +51,9 @@ class ReportController extends Controller
         $report->dataPerSheet([$info]);
         $report->index($index);
         $report->data($info);
+        $report->totalRegisters($request->ids);
         $report->external();
         $report->transmissionRaw();
-
 
         return $report->report("automatic","Suscripciones",null,null,false,1);
     }

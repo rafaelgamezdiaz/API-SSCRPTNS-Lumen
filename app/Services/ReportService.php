@@ -40,6 +40,7 @@ class ReportService
     private static $colors = ["primary"=>'#E92610',"secondary"=>'#f2f2f2',"auxiliary"=>'#ffffff'];
     public static $report;
     private static $returnRaw = false;
+    private static $total_of_registers = 0;
 
 
     /**
@@ -134,6 +135,13 @@ class ReportService
     }
 
     /**
+     * @param $total_registers
+     */
+    public function totalRegisters($data){
+        self::$total_of_registers = count($data);
+    }
+
+    /**
      * @param $array_index
      */
     public function index($array_index){
@@ -180,8 +188,7 @@ class ReportService
             foreach (self::$index as $title => $value) {
                 $arrayData[0][]=$title;
             }
-            //return self::$data;
-            $total_operaciones = 0;
+
             foreach (self::$data as $key){
                 $i=1;
                 $toArray = is_object($key) ? $key : is_array($key) ? (object) $key : null;
@@ -189,13 +196,14 @@ class ReportService
                     $toExcel[$i] = $toArray->$value ?? null;
                     $i++;
                 }
-                $total_operaciones++;
                 $arrayData[] = $toExcel;
             }
-            $arrayData[] = ['Total de Operaciones', $total_operaciones];
 
-            $sheet->getActiveSheet()->setCellValue("A6","Total de Operaciones: ");
-            $sheet->getActiveSheet()->setCellValue("B6",$total_operaciones); //->refreshColumnDimensions();
+            $total = self::$total_of_registers;
+            $arrayData[] = ['Total de Suscripciones', $total];
+
+            //$sheet->getActiveSheet()->setCellValue("A6","Total de Suscripciones: ");
+            $sheet->getActiveSheet()->setCellValue("B6",$total); //->refreshColumnDimensions();
             $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A8');
 
             $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
@@ -300,6 +308,7 @@ class ReportService
         $pdf->loadHtml($html);
         $pdf->render();
 
+
         $canvas = $pdf->getCanvas();
         $footer = $canvas->open_object();
 
@@ -347,6 +356,8 @@ class ReportService
         $date = self::$date;
         $colors = self::$colors;
         $logo =  self::$log_url;
+        $total_of_registers = self::$total_of_registers;
+
         include(resource_path("Reports/{$html}.php"));
 
         $result = ob_get_contents();

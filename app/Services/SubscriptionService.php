@@ -63,9 +63,11 @@ class SubscriptionService
     public function show($id, $productService)
     {
         $subscription = Subscription::findOrFail($id);
+        $code = $subscription->code;
         $subscription_details = $subscription->subscriptionDetails;
-        $subscription_details->each(function($subscription_details) use($productService) {
+        $subscription_details->each(function($subscription_details) use($productService, $code) {
             $subscription_details->product = $productService->getProduct($subscription_details->product_id, false);
+            $subscription_details->code = $code;
         });
         return $subscription_details;
     }
