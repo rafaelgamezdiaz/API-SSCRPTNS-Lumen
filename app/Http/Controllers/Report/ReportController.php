@@ -36,16 +36,17 @@ class ReportController extends Controller
         $info = $subscriptionService->querySubscription($request, $clientService, $productService);
 
         $index = [
-            "Id"                    =>"id",
-            "Code"                  =>"code",
+            "Item"                  =>"id",
+            "Nro suscripción"       =>"code",
             "Fecha Inicio"          =>"date_start",
             "Fecha Fin"             =>"date_end",
             "Ciclo de Facturacion"  =>"billing_cycle",
             "Estado"                =>"status",
             "Cliente"               =>"client",
-            "Producto"               =>"product",
-            "Precio"                 =>"sale_price"
+            "Producto"              =>"product",
+            "Precio"                =>"sale_price"
         ];
+
         $info = $this->buildReportTable($info);
         $report = (new ReportService());
         $report->indexPerSheet([$index]);
@@ -53,8 +54,13 @@ class ReportController extends Controller
         $report->index($index);
         $report->data($info);
         $report->external();
+        $report->totalRegisters($info);
+        $report->totalSubscriptions($request->ids);
         $report->transmissionRaw();
 
+        // Load Logo
+        $user = $request->get('user')->user;
+        $report->getAccountInfo($user->current_account);
 
         return $report->report("automatic","Suscripciones",null,null,false,1);
     }
@@ -62,11 +68,12 @@ class ReportController extends Controller
     private function buildReportTable($info){
         $table = array();
         $info = collect($info)->recursive();
+        $item = 1;
         foreach ($info as $i){
             foreach ($i['subscription_details'] as $product)
             {
                 array_push($table, [
-                                            'id'            => $i['id'],
+                                            'id'            => $item,
                                             'code'          => $i['code'],
                                             'date_start'    => $i['date_start'],
                                             'date_end'      => $i['date_end'],
@@ -76,6 +83,7 @@ class ReportController extends Controller
                                             'product'       => $product['product']['name'],
                                             'sale_price'    => $product['product']['sale_price']
                                            ]);
+                $item++;
             }
         }
 

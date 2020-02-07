@@ -72,9 +72,12 @@ class Subscription extends BaseModel
      * @param $code
      * @return bool
      */
-    public function checkCode($code)
+    public function checkCode($request)
     {
-        return count(Subscription::where('code', $code)->get()) == 0;
+        $subcription = Subscription::where('code', $request->code)
+                                   ->where('account', $request->account)
+                                   ->get();
+        return count($subcription) == 0;
     }
 
     public function isActive()

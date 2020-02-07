@@ -45,7 +45,6 @@ class ProductService extends BaseService
         // Add Products or Services to the Subscription
         foreach ($products as $product)
         {
-            $product = $this->getProductByName($request, $product, false);
             $this->addProduct($subscription_id, $product['id']);
         }
 
@@ -145,11 +144,30 @@ class ProductService extends BaseService
             ->first();
 
         if ( $product == false) {
-            return "Error! There is nor connection with API-Inventary";
+            return "¡Error de conexión con API-Inventary!";
+        }
+        if (count($product) == 0) {
+            return null;
         }
 
         // Returns Produc data. $extended == true --> full info, else returns specific fields.
         $product_fields = $product->first()->only(['id']);
         return ($extended == true) ? $product : $product_fields;
+    }
+
+    /**
+     * Returns a collection of products existing for the current account corresponding to a list of names $products_names
+     */
+    public function productsExisting($request, $products_names)
+    {
+        $product_existing = collect();
+        foreach ($products_names as $product_name)
+        {
+            $product = $this->getProductByName($request, $product_name, false);
+            if ($product != null) {
+                $product_existing->push($product);
+            }
+        }
+        return $product_existing;
     }
 }

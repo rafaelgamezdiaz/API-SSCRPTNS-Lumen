@@ -24,21 +24,27 @@
     tr:nth-child(even){background-color: #f2f2f2}
 
     th {
-        background-color: <?=$colors['primary']?>;
+        background-color: lightseagreen;
         color: white;
     }
     h1{
         font-family: apple-system;
         font-size: 2em;
     }
+    img {
+        position: absolute !important;
+        right: 30px !important;
+        top: 30px !important;
+        width: 60px;
+    }
+
 </style>
 <body>
     <div>
-        <img  style="width: 80px;float: right;" src="<?= $logo ?>" alt="Logo" ><br>
-        <div style="text-align: center;margin-top: 90px;">
-            <h2>Reporte de Subscripciones</h2>
+        <img src="<?= $logo ?>" alt="Logo" >
+        <div style="text-align: center;margin-top: 50px;">
+            <h2>Reporte de Suscripciones</h2>
         </div>
-
     </div>
 <div>
     <table>
@@ -59,8 +65,8 @@
             </tr>
         <?php endforeach ?>
         <tr>
-            <td>Total de registros</td>
-            <td><?php echo count($data); ?></td>
+            <td>Total de suscripciones</td>
+            <td><?php echo $total_of_subscriptions; ?></td>
         </tr>
         </tbody>
     </table>
