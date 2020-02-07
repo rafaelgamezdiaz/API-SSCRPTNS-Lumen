@@ -40,6 +40,7 @@ class ReportService
     private static $colors = ["primary"=>'#E92610',"secondary"=>'#f2f2f2',"auxiliary"=>'#ffffff'];
     public static $report;
     private static $returnRaw = false;
+    private static $total_of_subscriptions = 0;
     private static $total_of_registers = 0;
 
 
@@ -135,6 +136,13 @@ class ReportService
     }
 
     /**
+     * @param $total_subscriptions
+     */
+    public function totalSubscriptions($data){
+        self::$total_of_subscriptions = count($data);
+    }
+
+    /**
      * @param $total_registers
      */
     public function totalRegisters($data){
@@ -199,12 +207,16 @@ class ReportService
                 $arrayData[] = $toExcel;
             }
 
-            $total = self::$total_of_registers;
+
+            // $sheet->getActiveSheet()->setCellValue("A6","Total de Suscripciones: ");
+            // $sheet->getActiveSheet()->setCellValue("B6",$total); //->refreshColumnDimensions();
+            $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A6');
+            $total = self::$total_of_subscriptions;
             $arrayData[] = ['Total de Suscripciones', $total];
 
-            //$sheet->getActiveSheet()->setCellValue("A6","Total de Suscripciones: ");
-            $sheet->getActiveSheet()->setCellValue("B6",$total); //->refreshColumnDimensions();
-            $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A8');
+            //$sheet->getActiveSheet()->setCellValue("A6","Total de Operaciones: ");
+            //$sheet->getActiveSheet()->setCellValue("B6",$total_operaciones); //->refreshColumnDimensions();
+            $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A6');
 
             $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -357,6 +369,7 @@ class ReportService
         $colors = self::$colors;
         $logo =  self::$log_url;
         $total_of_registers = self::$total_of_registers;
+        $total_of_subscriptions = self::$total_of_subscriptions;
 
         include(resource_path("Reports/{$html}.php"));
 

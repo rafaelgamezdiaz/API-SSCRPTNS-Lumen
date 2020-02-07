@@ -24,7 +24,7 @@
     tr:nth-child(even){background-color: #f2f2f2}
 
     th {
-        background-color: <?=$colors['primary']?>;
+        background-color: lightseagreen;
         color: white;
     }
     h1{
@@ -37,6 +37,7 @@
         top: 30px !important;
         width: 60px;
     }
+
 </style>
 <body>
     <div>
@@ -44,7 +45,6 @@
         <div style="text-align: center;margin-top: 50px;">
             <h2>Reporte de Suscripciones</h2>
         </div>
-
     </div>
 <div>
     <table>
@@ -66,7 +66,11 @@
         <?php endforeach ?>
         <tr>
             <td>Total de suscripciones</td>
+<<<<<<< HEAD
             <td><?php echo $total_of_registers; ?></td>
+=======
+            <td><?php echo $total_of_subscriptions; ?></td>
+>>>>>>> gamez
         </tr>
         </tbody>
     </table>

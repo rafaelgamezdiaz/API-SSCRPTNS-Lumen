@@ -41,20 +41,20 @@ class SubscriptionService
         // Validations
         $this->validate($request, $subscription->rules());
 
-        if (count($request->product_id) == 0) {
-            return $this->errorMessage('Debe seleccionar al menos un producto o servicio!', 400);
-        }
-
         $subscription->fill($request->all());
+        $product_existens = $productService->productsExisting($request, $request->product_id);
 
-        if ($subscription->checkCode($request->code)) {
-            if ($subscription->save()) {
-                $productService->store($request, $subscription->id, collect($request->product_id));
-                return $this->successResponse('Subscription saved!', $subscription->id);
+        if ($product_existens->count()) {
+            if ($subscription->checkCode($request)) {
+                if ($subscription->save()) {
+                    $productService->store($request, $subscription->id, $product_existens);
+                    return $this->successResponse('Subscription saved!', $subscription->id);
+                }
+                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
             }
-            return $this->errorMessage('Sorry. Something happends when trying to save the subscription!', 409);
+            return $this->errorMessage('Error, el código ya ha sido utilizado para otra suscripción', 409);
         }
-        return $this->errorMessage('This code is not available!', 409);
+        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 409);
     }
 
     /**
@@ -194,11 +194,15 @@ class SubscriptionService
             // Getting the Client Info
             $subscriptions->client = $clientService->getClient($subscriptions->client_id, $extended);
 
-            // Getting the Produc or Service Info
-            $temp = $subscriptions->subscriptionDetails;
-            $temp->each(function($temp) use ($productService, $extended){
-                $temp->product = $productService->getProduct($temp->product_id, $extended);
+            // Getting the Subscription Details
+            $subscription_details = $subscriptions->subscriptionDetails;
+
+            // Get Services or Product Info
+            $subscription_details->each(function($subscription_details) use ($productService, $extended){
+                $subscription_details->product = $productService->getProduct($subscription_details->product_id, $extended);
             });
+            // $subscriptions
         });
+        //return [];
     }
 }
