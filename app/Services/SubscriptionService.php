@@ -7,12 +7,11 @@ namespace App\Services;
 use App\Models\Subscription;
 use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
-use App\Traits\ConsumesExternalService;
 use Laravel\Lumen\Routing\ProvidesConvenienceMethods;
 
 class SubscriptionService
 {
-    use ConsumesExternalService, ApiResponser, ProvidesConvenienceMethods;
+    use ApiResponser, ProvidesConvenienceMethods;
 
     /**
      * Returns the List of Subscriptions including Clients and Products or Services
@@ -43,12 +42,11 @@ class SubscriptionService
 
         $subscription->fill($request->all());
         $product_existens = $productService->productsExisting($request, $request->product_id);
-
         if ($product_existens->count()) {
             if ($subscription->checkCode($request)) {
                 if ($subscription->save()) {
-                    $productService->store($request, $subscription->id, $product_existens);
-                    return $this->successResponse('Subscription saved!', $subscription->id);
+                    $productService->store($subscription->id, $product_existens);
+                    return $this->successResponse('Suscripción guardada con éxito.', $subscription->id);
                 }
                 return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
             }
@@ -64,8 +62,9 @@ class SubscriptionService
     {
         $subscription = Subscription::findOrFail($id);
         $subscription_details = $subscription->subscriptionDetails;
-        $subscription_details->each(function($subscription_details) use($productService) {
+        $subscription_details->each(function($subscription_details) use($productService, $subscription) {
             $subscription_details->product = $productService->getProduct($subscription_details->product_id, false);
+            $subscription_details->code = $subscription->code;
         });
         return $subscription_details;
     }
@@ -78,10 +77,15 @@ class SubscriptionService
         $subscription = Subscription::findOrFail($id);
         $subscription->fill($request->all());
 
-        if ($subscription->update()) {
-            return $productService->update($subscription->id, $request->product_id);
+        $product_existens = $productService->productsExisting($request, $request->product_id);
+        if ($product_existens->count()) {
+                if ($subscription->update()) {
+                    $productService->update($subscription->id, $product_existens);
+                    return $this->successResponse('Suscripción actualizada', $subscription->id);
+                }
+                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
         }
-        return $this->errorMessage('Sorry. Something happends when trying to update the subscription!', 409);
+        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 409);
     }
 
     /**
@@ -92,9 +96,9 @@ class SubscriptionService
         $subscription = Subscription::findOrFail($id);
         if ($subscription->delete())
         {
-            return $this->successResponse('The subscription was deleted');
+            return $this->successResponse('La suscripción ha sido eliminada');
         }
-        return $this->errorMessage('Sorry! Something happends when trying to delete the subscription.');
+        return $this->errorMessage('Ha ocurrido un error al intentar eliminar la suscripción.');
     }
 
     /**
@@ -152,9 +156,9 @@ class SubscriptionService
         $subscription->status = $this->changeStatus($request->status);
         if ($subscription->update())
         {
-            return $this->successResponse('The Subscription status was updated') ;
+            return $this->successResponse('El estado de la suscripción ha cambiado.') ;
         }
-        return $this->errorMessage('Sorry!, something happends trying to change the Subscription status');
+        return $this->errorMessage('Ocurrio un error al intentar cambiar el estatus.');
     }
 
     /**

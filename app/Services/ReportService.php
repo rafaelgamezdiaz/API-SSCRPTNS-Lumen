@@ -21,6 +21,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
 
 class ReportService
 {
@@ -38,7 +39,7 @@ class ReportService
     private static $account = null;
     private static $orientation = "portrait";
     private static $colors = ["primary"=>'#E92610',"secondary"=>'#f2f2f2',"auxiliary"=>'#ffffff'];
-    public static $report;
+    public  static $report;
     private static $returnRaw = false;
     private static $total_of_subscriptions = 0;
     private static $total_of_registers = 0;
@@ -465,7 +466,34 @@ class ReportService
             $spreadsheet->getActiveSheet()->getStyle($columnStart.$rowStart.':'.$alphabet[$totalColumns].'1')->getFill()->setFillType(Fill::FILL_SOLID);
             $spreadsheet->getActiveSheet()->getStyle('A1:'.$alphabet[$totalColumns].'1')->getFont()->getColor()->setARGB('00000000');
 
-            if ($pathLogo){
+            $target = self::actionExcel($pathLogo);
+            $ext = self::get_extension($pathLogo);
+            if($target){
+                $objDrawing = new MemoryDrawing();
+                $objDrawing->setName('Logo');
+                $objDrawing->setDescription('Logo');
+
+                $col = $columnStart;
+                $col = $col.$rowStart;
+                $objDrawing->setCoordinates($col);
+
+                $objDrawing->setImageResource($target);
+                $objDrawing->setHeight(50);
+                $objDrawing->setWidth(100);
+                if($ext=='png'){
+                    $objDrawing->setRenderingFunction(MemoryDrawing::RENDERING_PNG);
+                }elseif ($ext=='jpg'){
+                    $objDrawing->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
+                }elseif ($ext=='jpeg'){
+                    $objDrawing->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
+                }elseif ($ext=='gif'){
+                    $objDrawing->setRenderingFunction(MemoryDrawing::RENDERING_GIF);
+                }
+                $objDrawing->setMimeType(MemoryDrawing::MIMETYPE_DEFAULT);
+                //$objDrawing->setCoordinates($alphabet[$totalColumns] . $rowStart);
+                $objDrawing->setWorksheet($spreadsheet->getActiveSheet());
+            }
+           /* if ($pathLogo){
                 $drawing = new Drawing();
                 $drawing->setName('Logo');
                 $drawing->setDescription('Logo');
@@ -474,7 +502,7 @@ class ReportService
                 $drawing->setWidth(100);
                 $drawing->setCoordinates($alphabet[$totalColumns-1].$rowStart);
                 $drawing->setWorksheet($spreadsheet->getActiveSheet());
-            }
+            }*/
             return $spreadsheet;
         }catch (Exception $exception){
             Log::critical($exception->getMessage() . $exception->getLine() . $exception->getFile());
@@ -572,6 +600,57 @@ class ReportService
             self::$date = count($timezone)>1 ?
                 Carbon::now()->setTimezone($timezone[1])->toDateTimeString() :
                 Carbon::now()->setTimezone('America/Panama')->toDateTimeString();
+        }
+    }
+
+
+    public static function actionExcel($urlimage){
+        $image = file_get_contents($urlimage);
+        $baseimag = base64_encode($image);
+        $ext = self::get_extension($urlimage);
+        $image = 'data:image/'.$ext.';base64,'.$baseimag;
+
+        // Resample image
+        if($ext=='png'){
+            $orig = imagecreatefrompng($image);
+        }elseif ($ext=='jpg'){
+            $orig = imagecreatefromjpg($image);
+        }elseif ($ext=='jpeg'){
+            $orig = imagecreatefromjpeg($image);
+        }elseif ($ext=='gif'){
+            $orig = imagecreatefromgif($image);
+        }
+
+        $imgWidth = imagesx($orig);
+        $imgHeight = imagesy($orig);
+
+        $target = imagecreatetruecolor($imgWidth, $imgHeight);
+
+        imagealphablending($target, false);
+        imagesavealpha($target, true);
+
+        imagecopyresampled($target, $orig, 0, 0, 0, 0, $imgWidth, $imgHeight, $imgWidth, $imgHeight);
+
+        return $target;
+    }
+
+    public static function get_extension($string)
+    {
+        if(!empty($string)){
+            $supported_image = array(
+                'gif',
+                'jpg',
+                'jpeg',
+                'png'
+            );
+            $ext = strtolower(pathinfo($string, PATHINFO_EXTENSION));
+            if (in_array($ext, $supported_image)) {
+                return $ext;
+            } else {
+                return null;
+            }
+        }else{
+            return null;
         }
     }
 }

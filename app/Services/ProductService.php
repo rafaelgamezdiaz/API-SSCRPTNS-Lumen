@@ -40,7 +40,7 @@ class ProductService extends BaseService
      * @param $products_id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store($request, $subscription_id, $products)
+    public function store($subscription_id, $products)
     {
         // Add Products or Services to the Subscription
         foreach ($products as $product)
@@ -48,7 +48,7 @@ class ProductService extends BaseService
             $this->addProduct($subscription_id, $product['id']);
         }
 
-        return $this->successResponse('Subscriptions were saved');
+        return $this->successResponse('Asignación de productos realizada con éxito.');
     }
 
 
@@ -65,9 +65,9 @@ class ProductService extends BaseService
 
         foreach ($products_id as $product_id)
         {
-            $this->updateProduct($subscription_id, $product_id);
+            $this->updateProduct($subscription_id, $product_id['id']);
         }
-        return $this->successResponse('Subscriptions were updated');
+        return $this->successResponse('La suscripciones han sido actualizadas.');
     }
 
     /**
