@@ -8,10 +8,10 @@
     <title><?= $title ?></title>
 </head>
 <style>
+
     table {
         border-collapse: collapse;
-        max-width: 100%;
-        min-width: 100%;
+        width: 100%;
         margin-top: 10px;
     }
 
@@ -26,6 +26,7 @@
     th {
         background-color: lightseagreen;
         color: white;
+        width: fit-content !important;
     }
     h1{
         font-family: apple-system;
@@ -33,7 +34,7 @@
     }
     img {
         position: absolute !important;
-        right: 30px !important;
+        left: 30px !important;
         top: 30px !important;
         width: 60px;
     }
