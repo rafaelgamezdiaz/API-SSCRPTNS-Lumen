@@ -12,7 +12,6 @@
     table {
         border-collapse: collapse;
         margin-top: 10px;
-        width: 96%;
     }
 
     th, td {
@@ -38,6 +37,11 @@
         top: 30px !important;
         width: 60px;
     }
+    .center {
+        position: absolute;
+        left: 5%;
+
+    }
 
 </style>
 <body>
@@ -47,35 +51,32 @@
             <h2>Reporte de Suscripciones</h2>
         </div>
     </div>
-<div>
-    <table>
-        <thead>
-        <tr>
-            <?php foreach ($index as $title => $value):?>
-                <th><?php echo $title ?></th>
-            <?php endforeach ?>
-        </tr>
-        </thead>
-        <tbody>
-        <?php $total = 0; ?>
-        <?php foreach ($data as $key):?>
+    <div class="center">
+        <table>
+            <thead>
             <tr>
-                <?php foreach ($index as $title):?>
-                    <td><?php echo is_array($key) ? $key[$title] ?? null : $key->$title ?? null?></td>
+                <?php foreach ($index as $title => $value):?>
+                    <th><?php echo $title ?></th>
                 <?php endforeach ?>
             </tr>
-        <?php endforeach ?>
-        <tr>
-            <td>Total de suscripciones</td>
-<<<<<<< HEAD
-            <td><?php echo $total_of_registers; ?></td>
-=======
-            <td><?php echo $total_of_subscriptions; ?></td>
->>>>>>> gamez
-        </tr>
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+            <?php $total = 0; ?>
+            <?php foreach ($data as $key):?>
+                <tr>
+                    <?php foreach ($index as $title):?>
+                        <td><?php echo is_array($key) ? $key[$title] ?? null : $key->$title ?? null?></td>
+                    <?php endforeach ?>
+                </tr>
+            <?php endforeach ?>
+            <tr>
+
+
+            </tr>
+            </tbody>
+        </table>
+    <h5 style="color: darkslategrey;">Total de suscripciones <small><?php echo $total_of_subscriptions; ?></small></h5>
+    </div>
 </body>
 </html>
 
