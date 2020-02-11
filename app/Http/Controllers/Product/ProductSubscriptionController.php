@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
+use App\Services\ClientService;
 use App\Services\ProductService;
+use App\Services\SubscriptionService;
 use App\Traits\ApiResponser;
 
-class ProductController extends Controller
+class ProductSubscriptionController extends Controller
 {
     use ApiResponser;
 
@@ -21,19 +23,11 @@ class ProductController extends Controller
     }
 
     /**
-     * Returns the product List from API-Ventas
+     * Return all Subscriptions for an specific product, include the client info (advanced filter)
      */
-    public function index()
+    public function index($product_id, SubscriptionService $subscriptionService, ClientService $clientService)
     {
-        return $this->productService->index();
+        return $subscriptionService->subscriptionsByProduct($product_id, $clientService);
     }
 
-    /**
-     * Returns a Product or Service from API-Ventas
-     */
-    public function show($id)
-    {
-        $product =  $this->productService->getProduct($id);
-        return $this->successResponse('Produc or Service',$product);
-    }
 }

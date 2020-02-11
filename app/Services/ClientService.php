@@ -3,13 +3,12 @@
 
 namespace App\Services;
 
-
 use App\Traits\ApiResponser;
-use App\Traits\ConsumesExternalService;
+use phpDocumentor\Reflection\Types\Boolean;
 
-class ClientService
+class ClientService extends BaseService
 {
-    use ConsumesExternalService, ApiResponser;
+    use ApiResponser;
 
     public function __construct()
     {
@@ -20,31 +19,32 @@ class ClientService
     }
 
     /**
-     * Returns the List of Clients from API-Clients, corresponding to the actual account
-     * @return \Illuminate\Http\JsonResponse
+     * Returns the List of Clients from API-Customers, corresponding to the actual account
      */
     public function index()
     {
-        $endpoint = '/clients';
-        if(isset($_GET['account'])){
-            $endpoint.='?account='.$_GET['account'];
-        }
-        $url = $this->getURL().$endpoint;
-        $clients = $this->performRequest('GET',$url,null,[]);
-        $clients = collect($clients)->first();
+        $endpoint = isset($_GET['account']) ? '/clients?account='.$_GET['account'] : '/clients';
+        $clients = $this->doRequest('GET',  $endpoint)
+                        ->first();
         return $this->successResponse('List of clients',$clients);
     }
 
     /**
-     * Returns a Client from API-Clients, by id
-     * @param $id
-     * @return mixed
+     * Returns a Client from API-Customers, by id
      */
-    public function getClient($id)
+    public function getClient($id, $extended)
     {
         $endpoint = '/clients/'.$id;
-        $url = $this->getURL().$endpoint;
-        $client = $this->performRequest('GET',$url,null,[]);
-        return collect($client)->first();
+        $client = $this->doRequest('GET',  $endpoint)
+            ->recursive()
+            ->first();
+
+        if ( $client == false) {
+            return "Error! There is nor connection with API-Customers";
+        }
+
+        // Returns Client data. $extended == true --> full info, else returns specific fields.
+        $client_fields = $client->only(['commerce_name', 'image']);
+        return ($extended == true) ? $client : $client_fields;
     }
 }

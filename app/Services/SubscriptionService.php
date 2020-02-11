@@ -5,100 +5,149 @@ namespace App\Services;
 
 
 use App\Models\Subscription;
+use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
-use App\Traits\ConsumesExternalService;
-use http\Env\Request;
 use Laravel\Lumen\Routing\ProvidesConvenienceMethods;
 
 class SubscriptionService
 {
-    use ConsumesExternalService, ApiResponser, ProvidesConvenienceMethods;
+    use ApiResponser, ProvidesConvenienceMethods;
 
     /**
      * Returns the List of Subscriptions including Clients and Products or Services
-     * @param $clientService
-     * @param $productService
-     * @return \Illuminate\Support\Collection
      */
     public function index($request, $clientService, $productService)
     {
         if (isset($_GET['where'])) {
-            $subscriptions = Subscription::doWhere($request)->orderBy('created_at', 'desc')->get();
+            $subscriptions = Subscription::doWhere($request)
+                                         ->where('account', $this->account())
+                                         ->orderBy('created_at', 'desc')
+                                         ->get();
         }
         else{
-            $subscriptions = Subscription::all()->sortByDesc('created_at');
+            $subscriptions = Subscription::where('account', $this->account())
+                                         ->orderBy('created_at', 'desc')
+                                         ->get();
         }
-       // $subscriptions = Subscription::all()->sortBy('id')->flatten();
-
-        // Get Clients and Products (or Services) for the Subscription
-        $subscriptions->each(function($subscriptions) use($clientService, $productService){
-            $subscriptions->client = $clientService->getClient($subscriptions->client_id);
-            $temp = $subscriptions->subscriptionDetails;
-            $temp->each(function($temp) use ($productService){
-                $temp->product = $productService->getProduct($temp->product_id);
-            });
-        });
-        return $subscriptions;
+        return $this->getClientsAndProducts($subscriptions, $clientService, $productService, false);
     }
 
     /**
      * Store the Subscription
-     * @param $request
-     * @param $subscription
-     * @param $product
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store($request, $subscription, $productService)
     {
         // Validations
         $this->validate($request, $subscription->rules());
+
         $subscription->fill($request->all());
-
-        if ($subscription->checkCode($request->code)) {
-            if ($subscription->save()) {
-                $productService->store($subscription->id, collect($request->product_id));
-
-                return $this->successResponse('Subscription saved!', $subscription->id);
+        $product_existens = $productService->productsExisting($request, $request->product_id);
+        if ($product_existens->count()) {
+            if ($subscription->checkCode($request)) {
+                if ($subscription->save()) {
+                    $productService->store($subscription->id, $product_existens);
+                    return $this->successResponse('Suscripción guardada con éxito.', $subscription->id);
+                }
+                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
             }
-            return $this->errorMessage('Sorry. Something happends when trying to save the subscription!', 409);
+            return $this->errorMessage('Error, el código ya ha sido utilizado para otra suscripción', 409);
         }
-        return $this->errorMessage('This code is not available!', 409);
+        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 409);
+    }
+
+    /**
+     * Return the Subscription Details (Producst ans services included in the subscription)
+     */
+    public function show($id, $productService)
+    {
+        $subscription = Subscription::findOrFail($id);
+        $code = $subscription->code;
+        $subscription_details = $subscription->subscriptionDetails;
+        $subscription_details->each(function($subscription_details) use($productService, $code) {
+            $subscription_details->product = $productService->getProduct($subscription_details->product_id, false);
+            $subscription_details->code = $code;
+        });
+        return $subscription_details;
     }
 
     /**
      * Update the Subscription
-     * @param $request
-     * @param $id
-     * @param $productService
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update($request, $id, $productService)
     {
         $subscription = Subscription::findOrFail($id);
         $subscription->fill($request->all());
 
-        if ($subscription->update()) {
-            return $productService->update($subscription->id, $request->product_id);
+        $product_existens = $productService->productsExisting($request, $request->product_id);
+        if ($product_existens->count()) {
+                if ($subscription->update()) {
+                    $productService->update($subscription->id, $product_existens);
+                    return $this->successResponse('Suscripción actualizada', $subscription->id);
+                }
+                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
         }
-        return $this->errorMessage('Sorry. Something happends when trying to update the subscription!', 409);
+        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 409);
     }
 
     /**
      * Remove the Subscription
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
         $subscription = Subscription::findOrFail($id);
         if ($subscription->delete())
         {
-            return $this->successResponse('The subscription was deleted');
+            return $this->successResponse('La suscripción ha sido eliminada');
         }
-        return $this->errorMessage('Sorry! Something happends when trying to delete the subscription.');
+        return $this->errorMessage('Ha ocurrido un error al intentar eliminar la suscripción.');
     }
 
+    /**
+     * Return all the subscriptions o a Client (Advanced Client Filter)
+     */
+    public function subscriptionsByClient($request, $client_id, $clientService, $productService)
+    {
+        if (isset($_GET['where'])) {
+            $subscriptions = Subscription::doWhere($request)->where('client_id', $client_id)->get();
+            // 'name', 'like', '%' . Input::get('name') . '%'
+        }
+        else
+        {
+            $subscriptions = Subscription::where('client_id', $client_id)->get();
+        }
+        $subscriptions = $this->getClientsAndProducts($subscriptions, $clientService, $productService, false);
+        return $this->dataResponse($subscriptions);
+    }
+
+    /**
+     * Return all the subscriptions o a Client (Advanced Client Filter)
+     */
+    public function subscriptionsByProduct($product_id, $clientService)
+    {
+        $subscription_details = SubscriptionDetail::where('product_id', $product_id)->get();
+        $subscription_details->each(function($subscription_details) use($clientService){
+
+            // Getting the Subscription Info
+            $subscription_details = $subscription_details->subscription;
+
+            // Getting the Client Info
+            $subscription_details->client = $clientService->getClient($subscription_details->client_id, false);
+        });
+
+        return $this->dataResponse($subscription_details);
+    }
+
+    public function account()
+    {
+        if ( isset($_GET['account'])) {
+            return $_GET['account'];
+        }
+        return null;
+    }
+
+    /**
+     * Mannage the Status of a subscriptions
+     */
     public function status($request, $id, $subscription)
     {
         // Validations
@@ -106,15 +155,57 @@ class SubscriptionService
 
         $subscription = Subscription::findOrFail($id);
         $subscription->status = $this->changeStatus($request->status);
-        if ($subscription->save())
+        if ($subscription->update())
         {
-            return $this->successResponse('The Subscription status was updated') ;
+            return $this->successResponse('El estado de la suscripción ha cambiado.') ;
         }
-        return $this->errorMessage('Sorry!, something happends trying to change the Subscription status');
+        return $this->errorMessage('Ocurrio un error al intentar cambiar el estatus.');
     }
 
+    /**
+     * Change the Status of a subscriptions (active or inactive)
+     */
     public function changeStatus($status)
     {
         return ($status == Subscription::SUBSCRIPTION_ACTIVE) ? Subscription::SUBSCRIPTION_ACTIVE : Subscription::SUBSCRIPTION_INACTIVE;
+    }
+
+    /**
+     * Make the query of the subscriptions (to use in the Report)
+     */
+    public function querySubscription($request, $clientService, $productService)
+    {
+        if ($request->has('where')){
+            $subscriptions = Subscription::doWhere($request)
+                                         ->whereIn('id', $request->ids);
+        }else{
+            $subscriptions = Subscription::whereIn('id', $request->ids);
+        }
+        $subscriptions = $subscriptions->orderByDesc('created_at')
+                                        ->get();
+        return $this->getClientsAndProducts($subscriptions, $clientService, $productService);
+    }
+
+    /**
+     * Returns info of Clients and Products for a list of subscriptions (from Customers and Inventary APIs)
+     * $extended = true  --> returns full info
+     * $extended = false --> returns only specifics fields
+     */
+    public function getClientsAndProducts($subscriptions, $clientService, $productService, $extended = false)
+    {
+        return $subscriptions->each(function($subscriptions) use($clientService, $productService, $extended){
+            // Getting the Client Info
+            $subscriptions->client = $clientService->getClient($subscriptions->client_id, $extended);
+
+            // Getting the Subscription Details
+            $subscription_details = $subscriptions->subscriptionDetails;
+
+            // Get Services or Product Info
+            $subscription_details->each(function($subscription_details) use ($productService, $extended){
+                $subscription_details->product = $productService->getProduct($subscription_details->product_id, $extended);
+            });
+            // $subscriptions
+        });
+        //return [];
     }
 }

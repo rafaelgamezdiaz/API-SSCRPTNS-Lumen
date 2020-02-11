@@ -39,6 +39,7 @@ trait ConsumesExternalService
     }
 
     public function getHeaders($request){
+        $token = '';
         if($request->hasHeader('Authorization')){
             $token = $request->header('Authorization');
         }

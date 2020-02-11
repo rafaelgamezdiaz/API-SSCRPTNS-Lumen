@@ -7,8 +7,10 @@ namespace App\Services;
 use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
+use function foo\func;
+use phpDocumentor\Reflection\Types\Boolean;
 
-class ProductService
+class ProductService extends BaseService
 {
     use ConsumesExternalService, ApiResponser;
 
@@ -26,14 +28,9 @@ class ProductService
      */
     public function index()
     {
-        $endpoint = '/products';
-        if(isset($_GET['where'])){
-            $endpoint.='?where='.$_GET['where'];
-        }
-        $url = $this->getURL().$endpoint;
-        $products = $this->performRequest('GET',$url,null,[]);
-        $products = collect($products)->first();
-
+        $endpoint = isset($_GET['where']) ? '/products?where='.$_GET['where'] : '/products';
+        $products = $this->doRequest('GET',  $endpoint)
+                         ->first();
         return $this->successResponse('List of products',$products);
     }
 
@@ -43,13 +40,15 @@ class ProductService
      * @param $products_id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store($subscription_id, $products_id)
+    public function store($subscription_id, $products)
     {
         // Add Products or Services to the Subscription
-        $products_id->each(function($products_id) use ($subscription_id) {
-            $this->addProduct($subscription_id, $products_id);
-        });
-        return $this->successResponse('Subscriptions were saved');
+        foreach ($products as $product)
+        {
+            $this->addProduct($subscription_id, $product['id']);
+        }
+
+        return $this->successResponse('Asignación de productos realizada con éxito.');
     }
 
 
@@ -66,9 +65,9 @@ class ProductService
 
         foreach ($products_id as $product_id)
         {
-            $this->updateProduct($subscription_id, $product_id);
+            $this->updateProduct($subscription_id, $product_id['id']);
         }
-        return $this->successResponse('Subscriptions were updated');
+        return $this->successResponse('La suscripciones han sido actualizadas.');
     }
 
     /**
@@ -121,13 +120,54 @@ class ProductService
      * @param $id
      * @return mixed
      */
-    public function getProduct($id)
+    public function getProduct($id, $extended)
     {
         $endpoint = '/products/'.$id;
-        $url = $this->getURL().$endpoint;
-        $product = $this->performRequest('GET',$url,null,[]);
-        return collect($product)->first();
+        $product = $this->doRequest('GET',  $endpoint)
+                         ->recursive()
+                         ->first();
+
+        if ( $product == false) {
+            return "Error! There is nor connection with API-Inventary";
+        }
+
+        // Returns Produc data. $extended == true --> full info, else returns specific fields.
+        $product_fields = $product->first()->only(['name','sale_price']);
+        return ($extended == true) ? $product : $product_fields;
     }
 
+    public function getProductByName($request, $name, $extended = true)
+    {
+        $endpoint = '/products?where=[{"op":"eq","field":"p.name", "value":"'.$name.'"},{"op":"eq", "field":"p.account", "value":'.$request->account.'}]';
+        $product = $this->doRequest('GET',  $endpoint)
+            ->recursive()
+            ->first();
 
+        if ( $product == false) {
+            return "¡Error de conexión con API-Inventary!";
+        }
+        if (count($product) == 0) {
+            return null;
+        }
+
+        // Returns Produc data. $extended == true --> full info, else returns specific fields.
+        $product_fields = $product->first()->only(['id']);
+        return ($extended == true) ? $product : $product_fields;
+    }
+
+    /**
+     * Returns a collection of products existing for the current account corresponding to a list of names $products_names
+     */
+    public function productsExisting($request, $products_names)
+    {
+        $product_existing = collect();
+        foreach ($products_names as $product_name)
+        {
+            $product = $this->getProductByName($request, $product_name, false);
+            if ($product != null) {
+                $product_existing->push($product);
+            }
+        }
+        return $product_existing;
+    }
 }

@@ -2,13 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class SubscriptionDetail extends Model
+class SubscriptionDetail extends BaseModel
 {
-    protected $fillable = ['subscription_id','product_id'];
+    use SoftDeletes;
 
-    public function contract()
+    protected $fillable = [
+        'subscription_id',
+        'product_id'
+    ];
+
+    protected $hidden = [
+        'subscription_id',
+        'deleted_at',
+        'created_at',
+        'updated_at'
+    ];
+
+    public function subscription()
     {
         return $this->belongsTo(Subscription::class);
     }

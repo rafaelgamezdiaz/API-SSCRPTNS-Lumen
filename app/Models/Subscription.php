@@ -12,10 +12,11 @@ class Subscription extends BaseModel
     use ConsumesExternalService;
     use SoftDeletes;
 
-    const SUBSCRIPTION_ACTIVE = 'active';
-    const SUBSCRIPTION_INACTIVE = 'inactive';
+    const SUBSCRIPTION_ACTIVE = 'Activa';
+    const SUBSCRIPTION_INACTIVE = 'Inactiva';
 
     protected $fillable = [
+            'account',
             'code',
             'client_id',
             'date_start',
@@ -23,14 +24,22 @@ class Subscription extends BaseModel
             'billing_cycle'
     ];
 
+    protected $hidden = [
+        'deleted_at',
+        'created_at',
+        'updated_at'
+    ];
+
     protected $client_name;
 
     public function rules()
     {
         return [
-            'client_id'             => 'required|numeric',
-            'date_start'            => 'required',
-            'date_end'              => 'required',
+            'account'         => 'required|numeric',
+            'code'            => 'required',
+            'client_id'       => 'required|numeric',
+            'date_start'      => 'required',
+            'date_end'        => 'required',
             'billing_cycle'   => 'required'
         ];
     }
@@ -63,16 +72,17 @@ class Subscription extends BaseModel
      * @param $code
      * @return bool
      */
-    public function checkCode($code)
+    public function checkCode($request)
     {
-        return count(Subscription::where('code', $code)->get()) == 0;
+        $subcription = Subscription::where('code', $request->code)
+                                   ->where('account', $request->account)
+                                   ->get();
+        return count($subcription) == 0;
     }
 
     public function isActive()
     {
         return $this->active == self::SUBSCRIPTION_ACTIVE;
     }
-
-
 
 }

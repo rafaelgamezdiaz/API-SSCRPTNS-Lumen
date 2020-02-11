@@ -14,7 +14,6 @@ class ClientController extends Controller
 
     /**
      * The service to consume the client service
-     * @var
      */
     protected $clientService;
 

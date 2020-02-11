@@ -16,7 +16,6 @@ class Authenticate
      *
      * @var \Illuminate\Contracts\Auth\Factory
      */
-    protected $auth;
 
 
     use ConsumesExternalService;
@@ -27,16 +26,6 @@ class Authenticate
         $this->client= new Client();
     }
 
-    /**
-     * Create a new middleware instance.
-     *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth
-     * @return void
-     */
-    public function __construct(Auth $auth)
-    {
-        $this->auth = $auth;
-    }
 
     /**
      * Handle an incoming request.
@@ -50,7 +39,7 @@ class Authenticate
     {
         $headers = $this->getHeaders($request);
         try{
-            $response = $this->client->get(env('CLIENTS_SERVICE_BASE_URL') . '/us/validate',['headers' => $headers]);
+            $response = $this->client->get(env('USERS_SERVICE_BASE_URL') . '/us/validate',['headers' => $headers]);
         }catch (ClientException $exception){
             $response = $exception->getResponse();
             return response()->json(["error"=>true,"message"=>'Unauthorized!'],$response->getStatusCode());
