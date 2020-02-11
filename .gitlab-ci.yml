@@ -192,7 +192,7 @@ prod_deploy_job:
   script:
     - docker stop prodsub-api || true
     - docker rm prodsub-api || true
-    - docker run -d --restart always --name prodsub-api -p 3005:80 prodsub-api
+    - docker run -d --restart always --name prodsub-api -p 3020:80 prodsub-api
     - docker exec prodsub-api php artisan migrate
   when: on_success
   tags:
@@ -206,7 +206,7 @@ prod_rollback_job:
     - docker image tag prodsub-api:prev prodsub-api:latest
     - docker stop prodsub-api || true
     - docker rm prodsub-api || true
-    - docker run -d --restart always --name prodsub-api -p 3005:80 prodsub-api
+    - docker run -d --restart always --name prodsub-api -p 3020:80 prodsub-api
   when: manual
   tags:
     - prodapp
