@@ -35,7 +35,7 @@
         position: absolute !important;
         left: 30px !important;
         top: 30px !important;
-        width: 60px;
+        width: 85px;
     }
     .center {
         position: absolute;
