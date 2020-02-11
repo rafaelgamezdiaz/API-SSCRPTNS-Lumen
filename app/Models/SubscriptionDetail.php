@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SubscriptionDetail extends BaseModel
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'subscription_id',
         'product_id'

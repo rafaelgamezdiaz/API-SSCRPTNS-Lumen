@@ -3,7 +3,6 @@
 
 namespace App\Models;
 
-
 use App\Query\QueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -13,13 +12,10 @@ class BaseModel extends Model
     protected $modelo;
     protected $fillable = ['*'];
 
-
     /**
      * @named Funcion para ejecutar el doWhere en el Modelo para ello recibe dos parametros el query y Request
      */
     public function scopeDoWhere($query, $request) {
-
-
         $list = QueryBuilder::for(static::class)
             ->select($this->getColumns($request))
             ->doJoin($this->getJoins($request))
@@ -187,7 +183,9 @@ class BaseModel extends Model
      */
     public function getUpdatedAtAttribute($value)
     {
+
         $carbon = new Carbon($value);
+
         return $carbon->subHours(5)->format('Y-m-d h:ia');
     }
 }

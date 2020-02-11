@@ -12,8 +12,8 @@ class Subscription extends BaseModel
     use ConsumesExternalService;
     use SoftDeletes;
 
-    const SUBSCRIPTION_ACTIVE = 'active';
-    const SUBSCRIPTION_INACTIVE = 'inactive';
+    const SUBSCRIPTION_ACTIVE = 'Activa';
+    const SUBSCRIPTION_INACTIVE = 'Inactiva';
 
     protected $fillable = [
             'account',
@@ -72,16 +72,17 @@ class Subscription extends BaseModel
      * @param $code
      * @return bool
      */
-    public function checkCode($code)
+    public function checkCode($request)
     {
-        return count(Subscription::where('code', $code)->get()) == 0;
+        $subcription = Subscription::where('code', $request->code)
+                                   ->where('account', $request->account)
+                                   ->get();
+        return count($subcription) == 0;
     }
 
     public function isActive()
     {
         return $this->active == self::SUBSCRIPTION_ACTIVE;
     }
-
-
 
 }

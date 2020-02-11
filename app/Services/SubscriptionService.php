@@ -7,12 +7,11 @@ namespace App\Services;
 use App\Models\Subscription;
 use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
-use App\Traits\ConsumesExternalService;
 use Laravel\Lumen\Routing\ProvidesConvenienceMethods;
 
 class SubscriptionService
 {
-    use ConsumesExternalService, ApiResponser, ProvidesConvenienceMethods;
+    use ApiResponser, ProvidesConvenienceMethods;
 
     /**
      * Returns the List of Subscriptions including Clients and Products or Services
@@ -40,16 +39,20 @@ class SubscriptionService
     {
         // Validations
         $this->validate($request, $subscription->rules());
-        $subscription->fill($request->all());
 
-        if ($subscription->checkCode($request->code)) {
-            if ($subscription->save()) {
-                $productService->store($subscription->id, collect($request->product_id));
-                return $this->successResponse('Subscription saved!', $subscription->id);
+        $subscription->fill($request->all());
+        $product_existens = $productService->productsExisting($request, $request->product_id);
+        if ($product_existens->count()) {
+            if ($subscription->checkCode($request)) {
+                if ($subscription->save()) {
+                    $productService->store($subscription->id, $product_existens);
+                    return $this->successResponse('Suscripción guardada con éxito.', $subscription->id);
+                }
+                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
             }
-            return $this->errorMessage('Sorry. Something happends when trying to save the subscription!', 409);
+            return $this->errorMessage('Error, el código ya ha sido utilizado para otra suscripción', 409);
         }
-        return $this->errorMessage('This code is not available!', 409);
+        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 409);
     }
 
     /**
@@ -58,9 +61,11 @@ class SubscriptionService
     public function show($id, $productService)
     {
         $subscription = Subscription::findOrFail($id);
+        $code = $subscription->code;
         $subscription_details = $subscription->subscriptionDetails;
-        $subscription_details->each(function($subscription_details) use($productService) {
+        $subscription_details->each(function($subscription_details) use($productService, $code) {
             $subscription_details->product = $productService->getProduct($subscription_details->product_id, false);
+            $subscription_details->code = $code;
         });
         return $subscription_details;
     }
@@ -73,10 +78,15 @@ class SubscriptionService
         $subscription = Subscription::findOrFail($id);
         $subscription->fill($request->all());
 
-        if ($subscription->update()) {
-            return $productService->update($subscription->id, $request->product_id);
+        $product_existens = $productService->productsExisting($request, $request->product_id);
+        if ($product_existens->count()) {
+                if ($subscription->update()) {
+                    $productService->update($subscription->id, $product_existens);
+                    return $this->successResponse('Suscripción actualizada', $subscription->id);
+                }
+                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
         }
-        return $this->errorMessage('Sorry. Something happends when trying to update the subscription!', 409);
+        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 409);
     }
 
     /**
@@ -87,9 +97,9 @@ class SubscriptionService
         $subscription = Subscription::findOrFail($id);
         if ($subscription->delete())
         {
-            return $this->successResponse('The subscription was deleted');
+            return $this->successResponse('La suscripción ha sido eliminada');
         }
-        return $this->errorMessage('Sorry! Something happends when trying to delete the subscription.');
+        return $this->errorMessage('Ha ocurrido un error al intentar eliminar la suscripción.');
     }
 
     /**
@@ -99,6 +109,7 @@ class SubscriptionService
     {
         if (isset($_GET['where'])) {
             $subscriptions = Subscription::doWhere($request)->where('client_id', $client_id)->get();
+            // 'name', 'like', '%' . Input::get('name') . '%'
         }
         else
         {
@@ -146,9 +157,9 @@ class SubscriptionService
         $subscription->status = $this->changeStatus($request->status);
         if ($subscription->update())
         {
-            return $this->successResponse('The Subscription status was updated') ;
+            return $this->successResponse('El estado de la suscripción ha cambiado.') ;
         }
-        return $this->errorMessage('Sorry!, something happends trying to change the Subscription status');
+        return $this->errorMessage('Ocurrio un error al intentar cambiar el estatus.');
     }
 
     /**
@@ -186,11 +197,15 @@ class SubscriptionService
             // Getting the Client Info
             $subscriptions->client = $clientService->getClient($subscriptions->client_id, $extended);
 
-            // Getting the Produc or Service Info
-            $temp = $subscriptions->subscriptionDetails;
-            $temp->each(function($temp) use ($productService, $extended){
-                $temp->product = $productService->getProduct($temp->product_id, $extended);
+            // Getting the Subscription Details
+            $subscription_details = $subscriptions->subscriptionDetails;
+
+            // Get Services or Product Info
+            $subscription_details->each(function($subscription_details) use ($productService, $extended){
+                $subscription_details->product = $productService->getProduct($subscription_details->product_id, $extended);
             });
+            // $subscriptions
         });
+        //return [];
     }
 }

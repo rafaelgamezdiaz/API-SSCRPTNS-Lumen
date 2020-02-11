@@ -21,6 +21,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
 
 class ReportService
 {
@@ -38,8 +39,10 @@ class ReportService
     private static $account = null;
     private static $orientation = "portrait";
     private static $colors = ["primary"=>'#E92610',"secondary"=>'#f2f2f2',"auxiliary"=>'#ffffff'];
-    public static $report;
+    public  static $report;
     private static $returnRaw = false;
+    private static $total_of_subscriptions = 0;
+    private static $total_of_registers = 0;
 
 
     /**
@@ -134,6 +137,20 @@ class ReportService
     }
 
     /**
+     * @param $total_subscriptions
+     */
+    public function totalSubscriptions($data){
+        self::$total_of_subscriptions = count($data);
+    }
+
+    /**
+     * @param $total_registers
+     */
+    public function totalRegisters($data){
+        self::$total_of_registers = count($data);
+    }
+
+    /**
      * @param $array_index
      */
     public function index($array_index){
@@ -173,13 +190,14 @@ class ReportService
             $toExcel = $arrayData = [];
             $spreadsheet = new Spreadsheet();
             $pathLogo = self::$log_url;
-            $sheet = self::getDefaultConfiguration($spreadsheet,$pathLogo, 'A',1);
+
+            $sheet = self::getDefaultConfiguration($spreadsheet,$pathLogo);
 
             //Parsear la información a pasar
             foreach (self::$index as $title => $value) {
                 $arrayData[0][]=$title;
             }
-            //return self::$data;
+
             foreach (self::$data as $key){
                 $i=1;
                 $toArray = is_object($key) ? $key : is_array($key) ? (object) $key : null;
@@ -189,17 +207,26 @@ class ReportService
                 }
                 $arrayData[] = $toExcel;
             }
-            $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A1')->refreshColumnDimensions();
+
+
+            // $sheet->getActiveSheet()->setCellValue("A6","Total de Suscripciones: ");
+            // $sheet->getActiveSheet()->setCellValue("B6",$total); //->refreshColumnDimensions();
+            $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A6');
+            $total = self::$total_of_subscriptions;
+            $arrayData[] = ['Total de Suscripciones', $total];
+
+            //$sheet->getActiveSheet()->setCellValue("A6","Total de Operaciones: ");
+            //$sheet->getActiveSheet()->setCellValue("B6",$total_operaciones); //->refreshColumnDimensions();
+            $sheet->getActiveSheet()->fromArray($arrayData, "Sin Registro", 'A6');
 
             $writer = IOFactory::createWriter($spreadsheet, "Xlsx");
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment; filename="report.xlsx"');
-            header('Access-Control-Allow-Origin:*');
+            //header('Access-Control-Allow-Origin:*');
 
             // Add Custom URL
             if (self::$external) {
                 $writer->save('./reports/'.self::$name.'.xls');
-                //return response()->json(["message"=>'reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
                 return response()->json(["message"=> env('CUSTOM_URL').'/reports/'.self::$name.'.xls'],200); //env('CUSTOM_URL').
             }
 
@@ -294,6 +321,7 @@ class ReportService
         $pdf->loadHtml($html);
         $pdf->render();
 
+
         $canvas = $pdf->getCanvas();
         $footer = $canvas->open_object();
 
@@ -341,6 +369,9 @@ class ReportService
         $date = self::$date;
         $colors = self::$colors;
         $logo =  self::$log_url;
+        $total_of_registers = self::$total_of_registers;
+        $total_of_subscriptions = self::$total_of_subscriptions;
+
         include(resource_path("Reports/{$html}.php"));
 
         $result = ob_get_contents();
@@ -365,12 +396,6 @@ class ReportService
                 $ff = date('Y-m-d', strtotime('next monday'));
                 $fi = $dt->isMonday() ? date('Y-m-d', $dt) : date('Y-m-d', strtotime("last Monday"));
             }
-            /*if (strtotime($fi) AND strtotime($ff)){
-                $spreadsheetCsv->getActiveSheet()->setCellValue("A4","Desde: ");
-                $spreadsheetCsv->getActiveSheet()->setCellValue("B4",$fi);
-                $spreadsheetCsv->getActiveSheet()->setCellValue("C4",'Hasta: ');
-                $spreadsheetCsv->getActiveSheet()->setCellValue("D4","$ff");
-            }*/
 
             //Parsear la información a pasar
             foreach (self::$index as $title => $value) {
@@ -426,15 +451,64 @@ class ReportService
                     ->setAutoSize(true);
             }
 
-            $spreadsheet->getActiveSheet()
-                ->getStyle($columnStart.$rowStart.':'.$alphabet[$totalColumns].'1')
-                ->getFill()
-                ->setFillType(Fill::FILL_SOLID);
-            $spreadsheet->getActiveSheet()
-                ->getStyle('A1:'.$alphabet[$totalColumns].'1')
-                ->getFont()
-                ->getColor()
-                ->setARGB('00000000');
+            $spreadsheet->getActiveSheet()->setCellValue($columnStart.$rowStart,"Reporte de " . self::$title);
+            $spreadsheet->getActiveSheet()->mergeCells($columnStart.$rowStart.':'.$alphabet[$totalColumns] . '5');
+            $spreadsheet->getActiveSheet()->getStyle($columnStart.$rowStart)->getFont()->setSize(16);
+            $spreadsheet->getActiveSheet()->getStyle($columnStart.$rowStart)->getAlignment()
+                ->applyFromArray([
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ]);
+
+            $spreadsheet->getActiveSheet()->getStyle($columnStart.$totalRows.':' . $alphabet[$totalColumns] . $totalRows)
+                ->applyFromArray([
+                    'borders' => [
+                        'outline' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ]);
+            $spreadsheet->getActiveSheet()->getStyle($columnStart.$rowStart.':'.$alphabet[$totalColumns].'1')->getFill()->setFillType(Fill::FILL_SOLID);
+            $spreadsheet->getActiveSheet()->getStyle('A1:'.$alphabet[$totalColumns].'1')->getFont()->getColor()->setARGB('00000000');
+
+            $target = self::actionExcel($pathLogo);
+            $ext = self::get_extension($pathLogo);
+            if($target){
+                $objDrawing = new MemoryDrawing();
+                $objDrawing->setName('Logo');
+                $objDrawing->setDescription('Logo');
+
+                $col = $columnStart;
+                $col = $col.$rowStart;
+                $objDrawing->setCoordinates($col);
+
+                $objDrawing->setImageResource($target);
+                $objDrawing->setHeight(50);
+                $objDrawing->setWidth(100);
+                if($ext=='png'){
+                    $objDrawing->setRenderingFunction(MemoryDrawing::RENDERING_PNG);
+                }elseif ($ext=='jpg'){
+                    $objDrawing->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
+                }elseif ($ext=='jpeg'){
+                    $objDrawing->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
+                }elseif ($ext=='gif'){
+                    $objDrawing->setRenderingFunction(MemoryDrawing::RENDERING_GIF);
+                }
+                $objDrawing->setMimeType(MemoryDrawing::MIMETYPE_DEFAULT);
+                //$objDrawing->setCoordinates($alphabet[$totalColumns] . $rowStart);
+                $objDrawing->setWorksheet($spreadsheet->getActiveSheet());
+            }
+           /* if ($pathLogo){
+                $drawing = new Drawing();
+                $drawing->setName('Logo');
+                $drawing->setDescription('Logo');
+                $drawing->setPath($pathLogo);
+                $drawing->setHeight(30);
+                $drawing->setWidth(100);
+                $drawing->setCoordinates($alphabet[$totalColumns-1].$rowStart);
+                $drawing->setWorksheet($spreadsheet->getActiveSheet());
+            }*/
             return $spreadsheet;
         }catch (Exception $exception){
             Log::critical($exception->getMessage() . $exception->getLine() . $exception->getFile());
@@ -532,6 +606,57 @@ class ReportService
             self::$date = count($timezone)>1 ?
                 Carbon::now()->setTimezone($timezone[1])->toDateTimeString() :
                 Carbon::now()->setTimezone('America/Panama')->toDateTimeString();
+        }
+    }
+
+
+    public static function actionExcel($urlimage){
+        $image = file_get_contents($urlimage);
+        $baseimag = base64_encode($image);
+        $ext = self::get_extension($urlimage);
+        $image = 'data:image/'.$ext.';base64,'.$baseimag;
+
+        // Resample image
+        if($ext=='png'){
+            $orig = imagecreatefrompng($image);
+        }elseif ($ext=='jpg'){
+            $orig = imagecreatefromjpg($image);
+        }elseif ($ext=='jpeg'){
+            $orig = imagecreatefromjpeg($image);
+        }elseif ($ext=='gif'){
+            $orig = imagecreatefromgif($image);
+        }
+
+        $imgWidth = imagesx($orig);
+        $imgHeight = imagesy($orig);
+
+        $target = imagecreatetruecolor($imgWidth, $imgHeight);
+
+        imagealphablending($target, false);
+        imagesavealpha($target, true);
+
+        imagecopyresampled($target, $orig, 0, 0, 0, 0, $imgWidth, $imgHeight, $imgWidth, $imgHeight);
+
+        return $target;
+    }
+
+    public static function get_extension($string)
+    {
+        if(!empty($string)){
+            $supported_image = array(
+                'gif',
+                'jpg',
+                'jpeg',
+                'png'
+            );
+            $ext = strtolower(pathinfo($string, PATHINFO_EXTENSION));
+            if (in_array($ext, $supported_image)) {
+                return $ext;
+            } else {
+                return null;
+            }
+        }else{
+            return null;
         }
     }
 }

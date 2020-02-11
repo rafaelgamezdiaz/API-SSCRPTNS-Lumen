@@ -41,7 +41,10 @@ $router->group(['prefix' => 'sub'], function () use ($router) {  // , 'middlewar
     $router->put('subscriptions/{id}/status', 'Subscription\SubscriptionController@status');
 
     // REPORT XLS
-    $router->post('/report', 'Report\ReportController@report');
+    $router->post('/report', [
+            'middleware'    => 'auth',
+            'uses'          => 'Report\ReportController@report'
+        ]);
 
 } );
 

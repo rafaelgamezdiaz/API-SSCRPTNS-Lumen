@@ -7,13 +7,15 @@
     "require": {
         "php": "^7.2",
         "ext-json": "*",
+        "doctrine/dbal": "^2.10",
         "dompdf/dompdf": "^0.8.3",
         "flipbox/lumen-generator": "^6.0",
         "guzzlehttp/guzzle": "^6.5",
         "laravel/lumen-framework": "^6.0",
         "nesbot/carbon": "^2.28",
         "nordsoftware/lumen-cors": "^3.2",
-        "phpoffice/phpspreadsheet": "^1.10"
+        "phpoffice/phpspreadsheet": "^1.10",
+        "ext-gd": "*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
