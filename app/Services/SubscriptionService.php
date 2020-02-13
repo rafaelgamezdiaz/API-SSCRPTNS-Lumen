@@ -9,9 +9,17 @@ use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use Laravel\Lumen\Routing\ProvidesConvenienceMethods;
 
-class SubscriptionService
+class SubscriptionService extends BaseService
 {
     use ApiResponser, ProvidesConvenienceMethods;
+
+    public function __construct()
+    {
+        $this->baseUri  = config('services.clients.base_url');
+        $this->port     = config('services.clients.port');
+        $this->secret   = config('services.clients.secret');
+        $this->prefix   = config('services.clients.prefix');
+    }
 
     /**
      * Returns the List of Subscriptions including Clients and Products or Services
@@ -52,7 +60,7 @@ class SubscriptionService
             }
             return $this->errorMessage('Error, el código ya ha sido utilizado para otra suscripción', 409);
         }
-        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 409);
+        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 400);
     }
 
     /**
@@ -108,12 +116,34 @@ class SubscriptionService
     public function subscriptionsByClient($request, $client_id, $clientService, $productService)
     {
         if (isset($_GET['where'])) {
-            $subscriptions = Subscription::doWhere($request)->where('client_id', $client_id)->get();
-            // 'name', 'like', '%' . Input::get('name') . '%'
+            $subscriptions = Subscription::doWhere($request)
+                                         ->where('client_id', $client_id)
+                                         ->get();
         }
         else
         {
             $subscriptions = Subscription::where('client_id', $client_id)->get();
+        }
+        $subscriptions = $this->getClientsAndProducts($subscriptions, $clientService, $productService, false);
+        return $this->dataResponse($subscriptions);
+    }
+
+    /**
+     * Return all the subscriptions o a Client (Advanced Client Filter)
+     */
+    public function subscriptionsFilterClientDates($request, $clientService, $productService)
+    {
+        $endpoint = '/clients?where=[{"op":"ct","field":"clients.commerce_name","value":"'.$request->commerce_name.'"}]';
+        $clients = collect($this->doRequest('GET',  $endpoint)->first())->pluck('id');
+
+        if (isset($_GET['where'])) {
+            $subscriptions = Subscription::doWhere($request)
+                                         ->whereIn('client_id', $clients)
+                                         ->get();
+        }
+        else
+        {
+            $subscriptions = Subscription::whereIn('client_id', $clients)->get();
         }
         $subscriptions = $this->getClientsAndProducts($subscriptions, $clientService, $productService, false);
         return $this->dataResponse($subscriptions);
@@ -204,8 +234,6 @@ class SubscriptionService
             $subscription_details->each(function($subscription_details) use ($productService, $extended){
                 $subscription_details->product = $productService->getProduct($subscription_details->product_id, $extended);
             });
-            // $subscriptions
         });
-        //return [];
     }
 }

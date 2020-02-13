@@ -8,24 +8,22 @@
     <title><?= $title ?></title>
 </head>
 <style>
-
     table {
         border-collapse: collapse;
         margin-top: 10px;
+        width: 100%;
     }
-
     th, td {
         text-align: center;
-        padding: 3px;
-        font-size:12px ;
+        padding: 1px;
+        font-size:11px ;
+        width: fit-content !important;
     }
-
     tr:nth-child(even){background-color: #f2f2f2}
 
     th {
         background-color: lightseagreen;
         color: white;
-        width: fit-content !important;
     }
     h1{
         font-family: apple-system;
@@ -37,12 +35,6 @@
         top: 30px !important;
         width: 85px;
     }
-    .center {
-        position: absolute;
-        left: 5%;
-
-    }
-
 </style>
 <body>
     <div>
@@ -51,7 +43,7 @@
             <h2>Reporte de Suscripciones</h2>
         </div>
     </div>
-    <div class="center">
+    <div>
         <table>
             <thead>
             <tr>
