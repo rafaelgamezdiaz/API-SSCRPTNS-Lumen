@@ -21,6 +21,8 @@ $router->group(['prefix' => 'sub'], function () use ($router) {  // , 'middlewar
     $router->get('clients/', 'Client\ClientController@index');
     $router->get('clients/{client_id}/subscriptions', 'Client\ClientSubscriptionController@index');
 
+    // ADVANCED FILTER BY CLIENT AND DATES
+    $router->get('clients/filter/', 'Client\ClientSubscriptionController@filter');
 
     // PRODUCTS ROUTES
     $router->get('products/', 'Product\ProductController@index');
@@ -39,6 +41,8 @@ $router->group(['prefix' => 'sub'], function () use ($router) {  // , 'middlewar
         'uses'       =>'Subscription\SubscriptionController@destroy'
     ]);
     $router->put('subscriptions/{id}/status', 'Subscription\SubscriptionController@status');
+
+
 
     // REPORT XLS
     $router->post('/report', [
