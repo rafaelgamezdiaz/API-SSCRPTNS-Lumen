@@ -25,11 +25,19 @@ class ClientSubscriptionController extends Controller
     }
 
     /**
-     * Return all Subscriptions for an specific client (advanced filter)
+     * Return all Subscriptions for an specific client
      */
     public function index(Request $request, $client_id, SubscriptionService $subscriptionService, ClientService $clientService, ProductService $productService)
     {
         return $subscriptionService->subscriptionsByClient($request, $client_id, $clientService, $productService);
+    }
+
+    /**
+     * Return all Subscriptions for an specific client and date range (advanced filter)
+     */
+    public function filter(Request $request, SubscriptionService $subscriptionService, ClientService $clientService, ProductService $productService)
+    {
+        return $subscriptionService->subscriptionsFilterClientDates($request, $clientService, $productService);
     }
 
 }

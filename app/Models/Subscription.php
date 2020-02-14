@@ -85,4 +85,12 @@ class Subscription extends BaseModel
         return $this->active == self::SUBSCRIPTION_ACTIVE;
     }
 
+    /**
+     * Accessor to return the Billing Cycle with first letter uppercase
+     */
+    public function getBillingCycleAttribute($value)
+    {
+        return ucfirst($value);
+    }
+
 }
