@@ -14,9 +14,9 @@ class AddFieldsToSubscriptionDetailsTable extends Migration
     public function up()
     {
         Schema::table('subscription_details', function (Blueprint $table) {
-            $table->integer("quantity");
-            $table->float('unit_price');
-            $table->float('tax');
+            $table->integer("quantity")->nullable();
+            $table->float('unit_price')->nullable();
+            $table->float('tax')->nullable();
         });
     }
 
