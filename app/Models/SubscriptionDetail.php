@@ -10,7 +10,10 @@ class SubscriptionDetail extends BaseModel
 
     protected $fillable = [
         'subscription_id',
-        'product_id'
+        'product_id',
+        'quantity',
+        'unit_price',
+        'tax'
     ];
 
     protected $hidden = [

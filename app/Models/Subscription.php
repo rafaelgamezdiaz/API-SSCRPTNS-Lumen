@@ -93,4 +93,12 @@ class Subscription extends BaseModel
         return ucfirst($value);
     }
 
+    /**
+     * Mutator to return the Billing Cycle with first letter uppercase
+     */
+    public function setBillingCycleAttribute($value)
+    {
+        return strtolower($value);
+    }
+
 }

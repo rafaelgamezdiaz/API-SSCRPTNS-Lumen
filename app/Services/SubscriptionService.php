@@ -49,18 +49,14 @@ class SubscriptionService extends BaseService
         $this->validate($request, $subscription->rules());
 
         $subscription->fill($request->all());
-        $product_existens = $productService->productsExisting($request, $request->product_id);
-        if ($product_existens->count()) {
-            if ($subscription->checkCode($request)) {
-                if ($subscription->save()) {
-                    $productService->store($subscription->id, $product_existens);
+        if ($subscription->checkCode($request)) {
+            if ($subscription->save()) {
+                    $productService->store($subscription->id, $request->products);
                     return $this->successResponse('Suscripción guardada con éxito.', $subscription->id);
-                }
-                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
             }
-            return $this->errorMessage('Error, el código ya ha sido utilizado para otra suscripción', 409);
+            return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
         }
-        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 400);
+        return $this->errorMessage('Error, el código ya ha sido utilizado para otra suscripción', 409);
     }
 
     /**
