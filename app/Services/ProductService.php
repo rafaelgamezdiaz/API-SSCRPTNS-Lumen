@@ -45,7 +45,7 @@ class ProductService extends BaseService
         // Add Products or Services to the Subscription
         foreach ($products as $product)
         {
-            $this->addProduct($subscription_id, $product['id']);
+            $this->addProduct($subscription_id, $product);
         }
 
         return $this->successResponse('Asignación de productos realizada con éxito.');
@@ -94,11 +94,14 @@ class ProductService extends BaseService
      * @param $product_id
      * @return mixed
      */
-    public function addProduct($subscription_id, $product_id)
+    public function addProduct($subscription_id, $product)
     {
         return SubscriptionDetail::create([
             'subscription_id' => $subscription_id,
-            'product_id' => $product_id
+            'product_id' => $product['id'],
+            'quantity' => $product['quantity'],
+            'unit_price' => $product['unit_price'],
+            'tax' => $product['tax']
         ]);
     }
 
@@ -132,7 +135,7 @@ class ProductService extends BaseService
         }
 
         // Returns Produc data. $extended == true --> full info, else returns specific fields.
-        $product_fields = $product->first()->only(['name','sale_price']);
+        $product_fields = $product->first()->only(['name']);
         return ($extended == true) ? $product : $product_fields;
     }
 
