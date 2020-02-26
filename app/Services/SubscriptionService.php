@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Subscription;
 use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
+use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\ProvidesConvenienceMethods;
 
 class SubscriptionService extends BaseService
@@ -47,20 +48,15 @@ class SubscriptionService extends BaseService
     {
         // Validations
         $this->validate($request, $subscription->rules());
-
         $subscription->fill($request->all());
-        $product_existens = $productService->productsExisting($request, $request->product_id);
-        if ($product_existens->count()) {
-            if ($subscription->checkCode($request)) {
-                if ($subscription->save()) {
-                    $productService->store($subscription->id, $product_existens);
+        if ($subscription->checkCode($request)) {
+            if ($subscription->save()) {
+                $productService->store($subscription->id, $request->products);
                     return $this->successResponse('Suscripción guardada con éxito.', $subscription->id);
-                }
-                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
             }
-            return $this->errorMessage('Error, el código ya ha sido utilizado para otra suscripción', 409);
+            return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
         }
-        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 400);
+        return $this->errorMessage('Error, el código ya ha sido utilizado para otra suscripción', 409);
     }
 
     /**
@@ -81,20 +77,17 @@ class SubscriptionService extends BaseService
     /**
      * Update the Subscription
      */
-    public function update($request, $id, $productService)
+    public function update(Request $request, $id, $productService)
     {
-        $subscription = Subscription::findOrFail($id);
+        $subscription = Subscription::find($id);
         $subscription->fill($request->all());
-
-        $product_existens = $productService->productsExisting($request, $request->product_id);
-        if ($product_existens->count()) {
-                if ($subscription->update()) {
-                    $productService->update($subscription->id, $product_existens);
-                    return $this->successResponse('Suscripción actualizada', $subscription->id);
-                }
-                return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
+        if ($subscription->update()) {
+            $products = collect($request->products)->recursive();
+            $subscription->subscriptionDetails;
+            $productService->update($subscription, $products);
+            return $this->successResponse('Suscripción actualizada', $subscription->id);
         }
-        return $this->errorMessage('Debe enviar productos o servicios disponibles para esta cuenta', 409);
+        return $this->errorMessage('Error, no se ha podido guardar la suscripción, inténtelo nuevamente.', 409);
     }
 
     /**

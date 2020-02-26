@@ -33,12 +33,14 @@
         position: absolute !important;
         left: 30px !important;
         top: 30px !important;
-        width: 85px;
+        width: 85px !important;
     }
 </style>
 <body>
     <div>
-        <img src="<?= $logo ?>" alt="Logo" >
+        <div>
+            <img src="<?= $logo ?>" alt="Logo" >
+        </div>
         <div style="text-align: center;margin-top: 50px;">
             <h2>Reporte de Suscripciones</h2>
         </div>
