@@ -74,7 +74,7 @@ class Subscription extends BaseModel
      */
     public function checkCode($request)
     {
-        $subcription = Subscription::where('code', $request->code)
+        $subcription = Subscription::where('code', strtolower($request->code))
                                    ->where('account', $request->account)
                                    ->get();
         return count($subcription) == 0;
@@ -88,17 +88,14 @@ class Subscription extends BaseModel
     /**
      * Accessor to return the Billing Cycle with first letter uppercase
      */
-    public function getBillingCycleAttribute($value)
+    public function getCodeAttribute($value)
     {
-        return ucfirst($value);
+        return strtoupper($value);
     }
 
-    /**
-     * Mutator to return the Billing Cycle with first letter uppercase
-     */
-    public function setBillingCycleAttribute($value)
+    public function setCodeAttribute($value)
     {
-        return strtolower($value);
+        $this->attributes['code'] = strtolower($value);
     }
 
 }
