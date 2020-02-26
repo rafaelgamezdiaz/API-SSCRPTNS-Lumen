@@ -17,7 +17,6 @@ class SubscriptionDetail extends BaseModel
     ];
 
     protected $hidden = [
-        'subscription_id',
         'deleted_at',
         'created_at',
         'updated_at'
