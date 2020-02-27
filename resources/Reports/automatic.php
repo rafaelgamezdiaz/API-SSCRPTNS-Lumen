@@ -32,7 +32,7 @@
     img {
         position: absolute !important;
         left: 30px !important;
-        top: 30px !important;
+        top: 10px !important;
         width: 85px !important;
     }
 </style>
