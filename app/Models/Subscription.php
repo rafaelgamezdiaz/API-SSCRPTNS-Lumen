@@ -13,7 +13,7 @@ class Subscription extends BaseModel
     use SoftDeletes;
 
     const SUBSCRIPTION_ACTIVE = 'Activa';
-    const SUBSCRIPTION_INACTIVE = 'Inactiva';
+    const SUBSCRIPTION_INACTIVE = 'Pausada';
 
     protected $fillable = [
             'account',

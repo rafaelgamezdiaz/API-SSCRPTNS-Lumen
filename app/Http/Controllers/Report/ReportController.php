@@ -43,7 +43,9 @@ class ReportController extends Controller
             "Estado"                =>"status",
             "Cliente"               =>"client",
             "Producto"              =>"product",
-            "Precio"                =>"sale_price"
+            "Precio"                =>"unit_price",
+            "Impuesto"              =>"tax",
+            "Cantidad"              =>"quantity"
         ];
 
         $info = $this->buildReportTable($info);
@@ -80,8 +82,10 @@ class ReportController extends Controller
                                             'billing_cycle' => $i['billing_cycle'],
                                             'status'        => $i['status'],
                                             'client'        => $i['client']['commerce_name'],
-                                            'product'       => $product['product']['name'],
-                                            'sale_price'    => $product['product']['sale_price']
+                                            'unit_price'    => $product['unit_price'],
+                                            'tax'           => $product['tax'],
+                                            'quantity'      => $product['quantity'],
+                                            'product'       => $product['product']['name']
                                            ]);
                 $item++;
             }
