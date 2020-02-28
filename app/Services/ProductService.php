@@ -4,6 +4,7 @@
 namespace App\Services;
 
 
+use App\Models\Product;
 use App\Models\SubscriptionDetail;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumesExternalService;
@@ -45,27 +46,25 @@ class ProductService extends BaseService
         // Add Products or Services to the Subscription
         foreach ($products as $product)
         {
-            $this->addProduct($subscription_id, $product['id']);
+            $this->addProduct($subscription_id, $product);
         }
-
         return $this->successResponse('Asignación de productos realizada con éxito.');
     }
 
 
     /**
      * Update Products and Services in the Subscription
-     * @param $subscription_id
-     * @param $products_id
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function update($subscription_id, $products_id)
+    public function update($subscription, $products)
     {
-        // Remove Products or Services not included in the update product_id array
-        $this->rejectProducts($subscription_id, $products_id);
+        $products_id = $products->pluck('id');
 
-        foreach ($products_id as $product_id)
+        // Remove products or services not included in update array
+        $this->rejectProducts($subscription->id, $products_id);
+
+        foreach ($products as $product)
         {
-            $this->updateProduct($subscription_id, $product_id['id']);
+            $this->proccessProduct($subscription->id, $product); //$product_id['id']
         }
         return $this->successResponse('La suscripciones han sido actualizadas.');
     }
@@ -73,33 +72,43 @@ class ProductService extends BaseService
     /**
      * Update an specific Product or Service for the subscription.
      * It is saved if not exist
-     * @param $subscription_id
-     * @param $product_id
-     * @return |null
      */
-    public function updateProduct($subscription_id, $product_id)
+    public function proccessProduct($subscription_id, $product)
     {
         $subscription_product = SubscriptionDetail::where('subscription_id', $subscription_id)
-                                                  ->where('product_id', $product_id)
+                                                  ->where('product_id', $product['id'])
                                                   ->get();
         if (count($subscription_product) == 0) {
-            $this->addProduct($subscription_id, $product_id);
+            $this->addProduct($subscription_id, $product);
+        }else{
+            $this->updateProduct($subscription_product->first(), $product);
         }
         return null;
     }
 
     /**
      * Add the Product or Service
-     * @param $subscription_id
-     * @param $product_id
-     * @return mixed
      */
-    public function addProduct($subscription_id, $product_id)
+    public function addProduct($subscription_id, $product)
     {
         return SubscriptionDetail::create([
             'subscription_id' => $subscription_id,
-            'product_id' => $product_id
+            'product_id' => $product['id'],
+            'quantity' => $product['quantity'],
+            'unit_price' => $product['unit_price'],
+            'tax' => $product['tax']
         ]);
+    }
+
+    /**
+     * Update the Product or Service
+     */
+    public function updateProduct($subscription_product, $product)
+    {
+        $subscription_product->quantity = $product['quantity'];
+        $subscription_product->unit_price = $product['unit_price'];
+        $subscription_product->tax = $product['tax'];
+        return $subscription_product->update();
     }
 
     /**
@@ -132,7 +141,7 @@ class ProductService extends BaseService
         }
 
         // Returns Produc data. $extended == true --> full info, else returns specific fields.
-        $product_fields = $product->first()->only(['name','sale_price']);
+        $product_fields = $product->first()->only(['name']);
         return ($extended == true) ? $product : $product_fields;
     }
 

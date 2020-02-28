@@ -37,7 +37,7 @@ class ReportService
     private static $user;
     private static $log_url = null;
     private static $account = null;
-    private static $orientation = "portrait";
+    private static $orientation = "landscape";
     private static $colors = ["primary"=>'#E92610',"secondary"=>'#f2f2f2',"auxiliary"=>'#ffffff'];
     public  static $report;
     private static $returnRaw = false;

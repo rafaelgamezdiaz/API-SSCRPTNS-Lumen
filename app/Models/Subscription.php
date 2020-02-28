@@ -13,7 +13,7 @@ class Subscription extends BaseModel
     use SoftDeletes;
 
     const SUBSCRIPTION_ACTIVE = 'Activa';
-    const SUBSCRIPTION_INACTIVE = 'Inactiva';
+    const SUBSCRIPTION_INACTIVE = 'Pausada';
 
     protected $fillable = [
             'account',
@@ -74,7 +74,7 @@ class Subscription extends BaseModel
      */
     public function checkCode($request)
     {
-        $subcription = Subscription::where('code', $request->code)
+        $subcription = Subscription::where('code', strtolower($request->code))
                                    ->where('account', $request->account)
                                    ->get();
         return count($subcription) == 0;
@@ -88,9 +88,14 @@ class Subscription extends BaseModel
     /**
      * Accessor to return the Billing Cycle with first letter uppercase
      */
-    public function getBillingCycleAttribute($value)
+    public function getCodeAttribute($value)
     {
-        return ucfirst($value);
+        return strtoupper($value);
+    }
+
+    public function setCodeAttribute($value)
+    {
+        $this->attributes['code'] = strtolower($value);
     }
 
 }

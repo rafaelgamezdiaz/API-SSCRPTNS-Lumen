@@ -13,12 +13,10 @@ class ChangeCompositeIndexInSubscriptionTable extends Migration
      */
     public function up()
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
             Schema::table('subscriptions', function (Blueprint $table) {
                 $table->dropUnique(["code", "created_at"]);
                 $table->unique(["code", "account","created_at"]);
             });
-        });
     }
 
     /**
