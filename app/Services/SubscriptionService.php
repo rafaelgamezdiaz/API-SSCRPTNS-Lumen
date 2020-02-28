@@ -225,7 +225,7 @@ class SubscriptionService extends BaseService
 
             // Get Services or Product Info
             $subscription_details->each(function($subscription_details) use ($productService, $extended){
-                $subscription_details->product = $productService->getProduct($subscription_details->product_id, $extended);
+                $subscription_details->product = $productService->getProduct($subscription_details->product_id, $extended)['name'];
             });
         });
     }
