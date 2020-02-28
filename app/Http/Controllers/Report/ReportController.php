@@ -85,7 +85,7 @@ class ReportController extends Controller
                                             'unit_price'    => $product['unit_price'],
                                             'tax'           => $product['tax'],
                                             'quantity'      => $product['quantity'],
-                                            'product'       => $product['product']['name']
+                                            'product'       => $product['product']
                                            ]);
                 $item++;
             }
