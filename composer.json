@@ -8,7 +8,7 @@
         "php": "^7.2",
         "ext-json": "*",
         "doctrine/dbal": "^2.10",
-        "dompdf/dompdf": "^0.8.3",
+        "dompdf/dompdf": "^1.2.1",
         "flipbox/lumen-generator": "^6.0",
         "guzzlehttp/guzzle": "^6.5",
         "laravel/lumen-framework": "^6.0",
